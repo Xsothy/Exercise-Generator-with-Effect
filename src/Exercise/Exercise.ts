@@ -56,7 +56,7 @@ export function generateContext<T extends ExerciseContext>(
                     contexts.some(
                         (context) => Equal.equals(ctx, context)
                     ),
-                body: (ctx) => Effect.succeed(ctx)
+                body: () => context
             }
         )
     })
