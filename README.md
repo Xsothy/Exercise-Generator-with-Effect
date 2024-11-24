@@ -31,3 +31,8 @@ To test the package:
 ```sh
 pnpm test
 ```
+
+***Todo***
+[] Add automatic testing
+[] Retry timeout on generated too many exercise
+[] Add Addition and Subtraction
