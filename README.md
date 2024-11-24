@@ -12,6 +12,8 @@ To execute a file with `tsx`:
 pnpm tsx ./src/index.ts
 ```
 
+Exercise with be save to './file' path
+
 ## Operations
 
 **Building**

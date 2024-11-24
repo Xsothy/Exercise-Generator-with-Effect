@@ -82,7 +82,10 @@ export function generateContexts<T extends ExerciseContext>(
             Random.Random
         >(
             {
-                step: (state) => contexts.push(state),
+                step: (state) => {
+                    console.log("Generating " + contexts.length)
+                    return contexts.push(state)
+                },
                 while: () => contexts.length < qty,
                 body: () =>
                     Effect.gen(function*() {

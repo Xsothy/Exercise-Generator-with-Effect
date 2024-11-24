@@ -28,7 +28,7 @@ const matchContext: (level: number) => Effect.Effect<
             Effect.gen(function*() {
                 const generateNum = yield* Effect.iterate(
                     {
-                        num1: yield* randomRange(100, 1000),
+                        num1: yield* randomRange(1000, 10000),
                         num2: yield* randomRange(2, 10)
                     },
                     {
