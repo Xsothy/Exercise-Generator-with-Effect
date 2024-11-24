@@ -1,10 +1,15 @@
 # Effect Package Template
 
-This template provides a solid foundation for building scalable and maintainable TypeScript package with Effect. 
+This template provides a solid foundation for building scalable and maintainable TypeScript package with Effect.
+
+## Todo
+- [ ] Add automatic testing
+- [ ] Retry timeout on generated too many exercise
+- [ ] Add Addition and Subtraction
 
 ## Running Code
 
-This template leverages [tsx](https://tsx.is) to allow execution of TypeScript files via NodeJS as if they were written in plain JavaScript.
+This template leverages [tsx](https://tsx.is) to allow execution of TypeScript files via Node.js as if they were written in plain JavaScript.
 
 To execute a file with `tsx`:
 
@@ -12,7 +17,7 @@ To execute a file with `tsx`:
 pnpm tsx ./src/index.ts
 ```
 
-Exercise with be save to './file' path
+Exercise will be saved to './file' path
 
 ## Operations
 
@@ -31,8 +36,3 @@ To test the package:
 ```sh
 pnpm test
 ```
-
-***Todo***
-[] Add automatic testing
-[] Retry timeout on generated too many exercise
-[] Add Addition and Subtraction
