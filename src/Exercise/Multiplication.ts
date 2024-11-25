@@ -1,9 +1,18 @@
 import type { Context, Random } from "effect"
-import { Effect, Layer, Match } from "effect"
+import { Effect, Equal, Layer, Match } from "effect"
 import { Exercise } from "src/Exercise/index.js"
 import { randomRange } from "src/utils.js"
 
 class MultiplicationContext extends Exercise.ExerciseContext {
+    [Equal.symbol](that: Equal.Equal): boolean {
+        if (that instanceof MultiplicationContext) {
+            return (
+                Equal.equals(this.num1, that.num1) &&
+                Equal.equals(this.num2, that.num2)
+            ) || Equal.equals(this.num1, this.num2)
+        }
+        return false
+    }
 }
 
 const matchContext: (level: number) => Effect.Effect<

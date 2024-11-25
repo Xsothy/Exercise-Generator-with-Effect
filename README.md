@@ -4,7 +4,7 @@ This template provides a solid foundation for building scalable and maintainable
 
 ## Todo
 - [ ] Add automatic testing
-- [ ] Retry timeout on generated too many exercise
+- [-] Add OutOfExerciseException
 - [ ] Add Addition and Subtraction
 
 ## Running Code

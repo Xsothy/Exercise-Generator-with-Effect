@@ -1,5 +1,7 @@
 import type { Random } from "effect"
-import { Context, Effect, Equal, Hash } from "effect"
+import { Context, Data, Effect, Equal, Hash } from "effect"
+
+class OutOfExerciseException extends Data.TaggedError("OutOfExerciseException") {}
 
 export class Exercise extends Context.Tag("Exercise")<
     Exercise,
@@ -48,15 +50,37 @@ export function generateContext<T extends ExerciseContext>(
         Random.Random
     >
 ) {
+    let duplicationContexts: Array<T> = []
+
     return Effect.gen(function*() {
         return yield* Effect.iterate(
             yield* context,
             {
-                while: (ctx) =>
-                    contexts.some(
+                while: (ctx) => {
+                    const duplicate = contexts.some(
                         (context) => Equal.equals(ctx, context)
-                    ),
-                body: () => context
+                    )
+
+                    const existInDuplicateContext = duplicationContexts.some((context) => Equal.equals(ctx, context))
+
+                    if (!existInDuplicateContext) {
+                        duplicationContexts.push(ctx)
+                    }
+
+                    if (!duplicate) {
+                        duplicationContexts = []
+                    }
+
+                    return duplicate
+                },
+                body: () =>
+                    Effect.gen(function*() {
+                        if (duplicationContexts.length === contexts.length) {
+                            console.log("Run Out Of Exercise")
+                            return yield* new OutOfExerciseException()
+                        }
+                        return yield* context
+                    })
             }
         )
     })
@@ -77,12 +101,17 @@ export function generateContexts<T extends ExerciseContext>(
     const contexts: Array<T> = []
     return Effect.gen(function*() {
         yield* Effect.whileLoop<
-            T,
+            T | null,
             never,
             Random.Random
         >(
             {
                 step: (state) => {
+                    if (!state) {
+                        qty = contexts.length
+                        return contexts
+                    }
+
                     console.log("Generating " + contexts.length)
                     return contexts.push(state)
                 },
@@ -90,7 +119,9 @@ export function generateContexts<T extends ExerciseContext>(
                 body: () =>
                     Effect.gen(function*() {
                         return yield* generateContext<T>(contexts, context)
-                    })
+                    }).pipe(
+                        Effect.catchTag("OutOfExerciseException", () => Effect.succeed(null))
+                    )
             }
         )
 
