@@ -4,7 +4,7 @@ import { Terminal } from "@effect/platform"
 import { NodeFileSystem, NodeRuntime, NodeTerminal } from "@effect/platform-node"
 import type { PlatformError } from "@effect/platform/Error"
 import type { Layer } from "effect"
-import { Effect, Random } from "effect"
+import { Data, Effect, pipe, Random } from "effect"
 import { Divide, Exercise, Multiply } from "src/Exercise/index.js"
 import { writeExerciseFiles } from "./writeFile.js"
 
@@ -12,30 +12,42 @@ const EXERCISES: Array<Layer.Layer<Exercise.Exercise>> = [Multiply.layer, Divide
 
 type ExerciseError = Terminal.QuitException | PlatformError
 
+class UnavailableLevelException extends Data.TaggedError("UnavailableLevelException") {
+}
+
 const chooseLevel: Effect.Effect<
     number,
-    ExerciseError,
+    Terminal.QuitException | UnavailableLevelException,
     Exercise.Exercise | Terminal.Terminal
-> = Effect.gen(function*() {
-    const exercise = yield* Exercise.Exercise
-    if (exercise.availableLevels <= 1) return 1
-
-    const levelChoices: Array<{
-        title: string
-        value: number
-    }> = []
-    for (let i = 0; i < exercise.availableLevels; i++) {
-        levelChoices.push({
-            title: `Level ${i + 1}`,
-            value: i + 1
+> = Exercise.Exercise.pipe(
+    Effect.andThen((exercise) => {
+        if (exercise.availableLevels <= 1) {
+            return Effect.fail(new UnavailableLevelException())
+        }
+        return Effect.succeed(exercise)
+    }),
+    Effect.flatMap((exercise) =>
+        Effect.loop(
+            0,
+            {
+                while: (i) => i < exercise.availableLevels,
+                step: (i) => i + 1,
+                body: (i) =>
+                    Effect.succeed({
+                        title: `Level ${i + 1}`,
+                        value: i + 1
+                    })
+            }
+        )
+    ),
+    Effect.flatMap((choices) => {
+        console.log(choices)
+        return Prompt.select<number>({
+            message: "What level you want to creates?",
+            choices
         })
-    }
-
-    return yield* Prompt.select<number>({
-        message: "What level you want to create?",
-        choices: levelChoices
     })
-})
+)
 
 const processExercises = (qty: number, level: number): Effect.Effect<
     void,
@@ -54,49 +66,43 @@ const processExercises = (qty: number, level: number): Effect.Effect<
     yield* terminal.display("Exercise files generated successfully!")
 })
 
-const program = Effect.gen(function*() {
-    // Get available exercise types
-    const exerciseTypes: Array<{
-        title: string
-        value: string
-    }> = EXERCISES.map(
+const program = pipe(
+    EXERCISES.map(
         (exercise) => {
             return Effect.provide(Exercise.Exercise, exercise).pipe(
-                Effect.map((ctx) => {
-                    return {
-                        title: ctx.key,
-                        value: ctx.key
-                    }
-                })
-            ).pipe(Effect.runSync)
+                Effect.map((ctx) => ({
+                    title: ctx.key,
+                    value: ctx.key
+                })),
+                Effect.runSync
+            )
         }
-    )
-
-    // Let user choose exercise type
-    const selectedExercise = yield* Prompt.select<string>({
-        message: "What exercise do you want?",
-        choices: exerciseTypes
-    }).pipe(
-        Effect.map((selected) =>
-            EXERCISES.find((exercise) =>
-                Effect.provide(Exercise.Exercise, exercise).pipe(
-                    Effect.map((val) => val.key === selected),
-                    Effect.runSync
-                )
-            ) as Layer.Layer<Exercise.Exercise>
+    ),
+    (exerciseTypes) =>
+        Prompt.select<string>({
+            message: "What exercise do you want?",
+            choices: exerciseTypes
+        }),
+    Effect.map((selected) =>
+        EXERCISES.find((exercise) =>
+            Effect.provide(Exercise.Exercise, exercise).pipe(
+                Effect.map((val) => val.key === selected),
+                Effect.runSync
+            )
+        ) as Layer.Layer<Exercise.Exercise>
+    ),
+    Effect.flatMap((selectedExercise) =>
+        Effect.gen(function*() {
+            const level = yield* chooseLevel
+            const quantity = yield* Prompt.integer({
+                message: "How much you want to generate?"
+            })
+            yield* processExercises(quantity, level)
+        }).pipe(
+            Effect.provide(selectedExercise)
         )
     )
-
-    return yield* Effect.gen(function*() {
-        const level = yield* chooseLevel
-        const quantity = yield* Prompt.integer({
-            message: "How much you want to generate?"
-        })
-        yield* processExercises(quantity, level)
-    }).pipe(
-        Effect.provide(selectedExercise)
-    )
-})
+)
 
 // Run program
 program.pipe(
