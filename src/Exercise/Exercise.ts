@@ -1,7 +1,5 @@
 import type { Random } from "effect"
-import { Context, Data, Effect, Equal, Hash } from "effect"
-
-class OutOfExerciseException extends Data.TaggedError("OutOfExerciseException") {}
+import { Context, Effect, Equal, Hash, HashSet } from "effect"
 
 export class Exercise extends Context.Tag("Exercise")<
     Exercise,
@@ -42,50 +40,6 @@ export abstract class ExerciseContext implements Equal.Equal {
     }
 }
 
-export function generateContext<T extends ExerciseContext>(
-    contexts: Array<ExerciseContext>,
-    context: Effect.Effect<
-        T,
-        never,
-        Random.Random
-    >
-) {
-    let duplicationContexts: Array<T> = []
-
-    return Effect.gen(function*() {
-        return yield* Effect.iterate(
-            yield* context,
-            {
-                while: (ctx) => {
-                    const duplicate = contexts.some(
-                        (context) => Equal.equals(ctx, context)
-                    )
-
-                    const existInDuplicateContext = duplicationContexts.some((context) => Equal.equals(ctx, context))
-
-                    if (!existInDuplicateContext) {
-                        duplicationContexts.push(ctx)
-                    }
-
-                    if (!duplicate) {
-                        duplicationContexts = []
-                    }
-
-                    return duplicate
-                },
-                body: () =>
-                    Effect.gen(function*() {
-                        if (duplicationContexts.length === contexts.length) {
-                            console.log("Run Out Of Exercise")
-                            return yield* new OutOfExerciseException()
-                        }
-                        return yield* context
-                    })
-            }
-        )
-    })
-}
-
 export function generateContexts<T extends ExerciseContext>(
     context: Effect.Effect<
         T,
@@ -94,11 +48,14 @@ export function generateContexts<T extends ExerciseContext>(
     >,
     qty: number
 ): Effect.Effect<
-    Array<T>,
+    HashSet.HashSet<T>,
     never,
     Random.Random
 > {
-    const contexts: Array<T> = []
+    let oldSize = -1
+    const contexts: HashSet.HashSet<T> = HashSet.beginMutation(HashSet.empty())
+    const duplicationContexts: HashSet.HashSet<T> = HashSet.beginMutation(HashSet.empty())
+
     return Effect.gen(function*() {
         yield* Effect.whileLoop<
             T | null,
@@ -108,19 +65,30 @@ export function generateContexts<T extends ExerciseContext>(
             {
                 step: (state) => {
                     if (!state) {
-                        qty = contexts.length
+                        qty = HashSet.size(contexts)
                         return contexts
                     }
 
-                    console.log("Generating " + contexts.length)
-                    return contexts.push(state)
+                    oldSize = HashSet.size(contexts)
+                    return HashSet.add(contexts, state)
                 },
-                while: () => contexts.length < qty,
+                while: () => HashSet.size(contexts) < qty,
                 body: () =>
-                    Effect.gen(function*() {
-                        return yield* generateContext<T>(contexts, context)
-                    }).pipe(
-                        Effect.catchTag("OutOfExerciseException", () => Effect.succeed(null))
+                    context.pipe(
+                        Effect.flatMap((ctx) => {
+                            if (oldSize !== HashSet.size(contexts)) {
+                                // Delete all
+                                HashSet.filter(contexts, () => false)
+                                console.log("Generating " + HashSet.size(contexts))
+                                return Effect.succeed(ctx)
+                            }
+                            if (HashSet.size(contexts) !== HashSet.size(duplicationContexts)) {
+                                HashSet.add(duplicationContexts, ctx)
+                                return Effect.succeed(ctx)
+                            }
+                            console.log("Out of Exercise")
+                            return Effect.succeed(null)
+                        })
                     )
             }
         )

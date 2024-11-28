@@ -3,8 +3,7 @@
 This template provides a solid foundation for building scalable and maintainable TypeScript package with Effect.
 
 ## Todo
-- [ ] Add automatic testing
-- [-] Add OutOfExerciseException
+- [ ] Add automatic Testing
 - [ ] Add Addition and Subtraction
 
 ## Running Code

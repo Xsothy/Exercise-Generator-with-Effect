@@ -1,5 +1,5 @@
 import type { Context, Random } from "effect"
-import { Effect, Layer, Match } from "effect"
+import { Effect, HashSet, Layer, Match } from "effect"
 import { Exercise } from "src/Exercise/index.js"
 import { randomRange } from "../utils.js"
 
@@ -118,13 +118,13 @@ const generate: Context.Tag.Service<Exercise.Exercise>["generate"] = (qty: numbe
 
         let question = ""
         let answer = ""
-        contexts.forEach(
-            (ctx, i) => {
-                const { ans, num1, num2 } = ctx
-                question += `${i + 1}. ${num1} / ${num2} = \n`
-                answer += `${i + 1}. ${num1} / ${num2} = ${ans}\n`
-            }
-        )
+        let i = 0
+        HashSet.forEach(contexts, (ctx) => {
+            const { ans, num1, num2 } = ctx
+            question += `${i + 1}. ${num1} / ${num2} = \n`
+            answer += `${i + 1}. ${num1} / ${num2} = ${ans}\n`
+            i++
+        })
 
         return { question, answer }
     })

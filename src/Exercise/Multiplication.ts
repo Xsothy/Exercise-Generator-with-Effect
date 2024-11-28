@@ -1,18 +1,9 @@
 import type { Context, Random } from "effect"
-import { Effect, Equal, Layer, Match } from "effect"
+import { Effect, HashSet, Layer, Match } from "effect"
 import { Exercise } from "src/Exercise/index.js"
 import { randomRange } from "src/utils.js"
 
 class MultiplicationContext extends Exercise.ExerciseContext {
-    [Equal.symbol](that: Equal.Equal): boolean {
-        if (that instanceof MultiplicationContext) {
-            return (
-                Equal.equals(this.num1, that.num1) &&
-                Equal.equals(this.num2, that.num2)
-            ) || Equal.equals(this.num1, this.num2)
-        }
-        return false
-    }
 }
 
 const matchContext: (level: number) => Effect.Effect<
@@ -68,10 +59,12 @@ const generate: Context.Tag.Service<Exercise.Exercise>["generate"] = (qty: numbe
         const contexts = yield* Exercise.generateContexts(matchContext(level), qty)
         let question = ""
         let answer = ""
-        contexts.forEach((ctx, i) => {
+        let i = 0
+        HashSet.forEach(contexts, (ctx) => {
             const { num1, num2 } = ctx
             question += `${i + 1}. ${num1} * ${num2} = \n`
             answer += `${i + 1}. ${num1} * ${num2} = ${num1 * num2}\n`
+            i++
         })
 
         return { question, answer }
