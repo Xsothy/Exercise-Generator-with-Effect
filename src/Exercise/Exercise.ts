@@ -1,3 +1,5 @@
+import { Prompt } from "@effect/cli"
+import type { Terminal } from "@effect/platform"
 import type { Random } from "effect"
 import { Context, Effect, Equal, Hash, HashSet } from "effect"
 
@@ -6,13 +8,13 @@ export class Exercise extends Context.Tag("Exercise")<
     {
         key: string
         availableLevels: number
-        generate: (qty: number, level: number) => Effect.Effect<
+        generate: (level: number) => Effect.Effect<
             {
                 question: string
                 answer: string
             },
             never,
-            Random.Random
+            Random.Random | Terminal.Terminal
         >
     }
 >() {
@@ -45,18 +47,24 @@ export function generateContexts<T extends ExerciseContext>(
         T,
         never,
         Random.Random
-    >,
-    qty: number
+    >
 ): Effect.Effect<
     HashSet.HashSet<T>,
     never,
-    Random.Random
+    Random.Random | Terminal.Terminal
 > {
     let oldSize = -1
     const contexts: HashSet.HashSet<T> = HashSet.beginMutation(HashSet.empty())
     const duplicationContexts: HashSet.HashSet<T> = HashSet.beginMutation(HashSet.empty())
 
     return Effect.gen(function*() {
+        let qty = yield* Prompt.integer({
+            message: "How much you want to generate?"
+        }).pipe(
+            Effect.catchTag("QuitException", () => {
+                return Effect.succeed(HashSet.size(contexts))
+            })
+        )
         yield* Effect.whileLoop<
             T | null,
             never,

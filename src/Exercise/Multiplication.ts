@@ -54,9 +54,9 @@ const matchContext: (level: number) => Effect.Effect<
         )
     )
 
-const generate: Context.Tag.Service<Exercise.Exercise>["generate"] = (qty: number, level: number) =>
+const generate: Context.Tag.Service<Exercise.Exercise>["generate"] = (level: number) =>
     Effect.gen(function*() {
-        const contexts = yield* Exercise.generateContexts(matchContext(level), qty)
+        const contexts = yield* Exercise.generateContexts(matchContext(level))
         let question = ""
         let answer = ""
         let i = 0
