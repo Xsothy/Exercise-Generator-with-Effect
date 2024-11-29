@@ -53,53 +53,37 @@ export function generateContexts<T extends ExerciseContext>(
     never,
     Random.Random | Terminal.Terminal
 > {
-    let oldSize = -1
-    const contexts: HashSet.HashSet<T> = HashSet.beginMutation(HashSet.empty())
-    const duplicationContexts: HashSet.HashSet<T> = HashSet.beginMutation(HashSet.empty())
-
     return Effect.gen(function*() {
-        let qty = yield* Prompt.integer({
+        const contexts: HashSet.HashSet<T> = HashSet.beginMutation(HashSet.empty())
+        const duplicationContexts: HashSet.HashSet<T> = HashSet.beginMutation(HashSet.empty())
+
+        const qty = yield* Prompt.integer({
             message: "How much you want to generate?"
         }).pipe(
-            Effect.catchTag("QuitException", () => {
-                return Effect.succeed(HashSet.size(contexts))
-            })
+            Effect.catchTag("QuitException", () => Effect.succeed(0)) // Quit if user cancels
         )
-        yield* Effect.whileLoop<
-            T | null,
-            never,
-            Random.Random
-        >(
-            {
-                step: (state) => {
-                    if (!state) {
-                        qty = HashSet.size(contexts)
-                        return contexts
-                    }
 
-                    oldSize = HashSet.size(contexts)
-                    return HashSet.add(contexts, state)
-                },
-                while: () => HashSet.size(contexts) < qty,
-                body: () =>
-                    context.pipe(
-                        Effect.flatMap((ctx) => {
-                            if (oldSize !== HashSet.size(contexts)) {
-                                // Delete all
-                                HashSet.filter(contexts, () => false)
-                                console.log("Generating " + HashSet.size(contexts))
-                                return Effect.succeed(ctx)
-                            }
-                            if (HashSet.size(contexts) !== HashSet.size(duplicationContexts)) {
-                                HashSet.add(duplicationContexts, ctx)
-                                return Effect.succeed(ctx)
-                            }
-                            console.log("Out of Exercise")
-                            return Effect.succeed(null)
-                        })
-                    )
+        if (qty === 0) {
+            return contexts // No exercises needed
+        }
+
+        while (HashSet.size(contexts) < qty) {
+            const generated = yield* context
+
+            if (!HashSet.has(contexts, generated)) {
+                console.log(HashSet.size(contexts))
+                HashSet.add(contexts, generated)
+
+                HashSet.filter(duplicationContexts, () => false)
+            } else if (!HashSet.has(duplicationContexts, generated)) {
+                HashSet.add(duplicationContexts, generated)
+
+                if (HashSet.size(duplicationContexts) === HashSet.size(contexts)) {
+                    console.log("No more unique exercises can be generated.")
+                    break
+                }
             }
-        )
+        }
 
         return contexts
     })

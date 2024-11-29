@@ -5,7 +5,7 @@ export const randomRange: (min: number, max: number) => Effect.Effect<
     never,
     Random.Random
 > = (min, max) =>
-    Effect.gen(function*() {
-        const random = yield* Random.Random
-        return (yield* random.nextInt) % (max - min) + min
-    })
+    Effect.andThen(
+        Random.Random,
+        (random) => random.nextIntBetween(min, max)
+    )
