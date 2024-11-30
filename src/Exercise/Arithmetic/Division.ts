@@ -1,7 +1,7 @@
-import type { Context, Random } from "effect"
+import type { Random } from "effect"
 import { Effect, HashSet, Layer, Match } from "effect"
 import { Exercise } from "src/Exercise/index.js"
-import { randomRange } from "../utils.js"
+import { randomRange } from "src/utils.js"
 
 class DivisionContext extends Exercise.ExerciseContext {
     constructor(
@@ -23,7 +23,6 @@ const matchContext: (level: number) => Effect.Effect<
     Random.Random
 > = (level) =>
     Match.value<number>(level).pipe(
-        // Level 5: Division with decimals in the result (e.g., 47 ÷ 8 = 5.875).
         Match.when((level) => level === 5, () =>
             Effect.gen(function*() {
                 const generateNum = yield* Effect.iterate(
@@ -51,8 +50,6 @@ const matchContext: (level: number) => Effect.Effect<
                     ans: (generateNum.num1 / generateNum.num2).toString()
                 })
             })),
-        // Level 4: Division of 5-digit numbers by 2-digit numbers but from multiple of 1-digit number
-        // (e.g., 86,352 ÷ 56) from 8 * 7 = 56
         Match.when((level) => level === 4, () =>
             Effect.gen(function*() {
                 const num1 = yield* randomRange(100, 1000)
@@ -72,7 +69,6 @@ const matchContext: (level: number) => Effect.Effect<
                     ans: num1.toString()
                 })
             })),
-        // Level 3: Long division of 3-digit numbers by 1-digit numbers (e.g., 345 ÷ 7).
         Match.when((level) => level === 3, () =>
             Effect.gen(function*() {
                 const num1 = yield* randomRange(100, 1000)
@@ -85,7 +81,6 @@ const matchContext: (level: number) => Effect.Effect<
                     ans: `${answer} R${remainder}`
                 })
             })),
-        // Level 2: Division of 2-digit numbers with a remainder (e.g., 29 ÷ 5 = 5 R4).
         Match.when((level) => level === 2, () =>
             Effect.gen(function*() {
                 const num1 = yield* randomRange(10, 100)
@@ -98,7 +93,6 @@ const matchContext: (level: number) => Effect.Effect<
                     ans: `${answer} R${remainder}`
                 })
             })),
-        // Level 1: Simple division with no remainders, using small numbers (e.g., 24 ÷ 6 = 4).
         Match.orElse(() =>
             Effect.gen(function*() {
                 const num1 = yield* randomRange(2, 10)
@@ -112,28 +106,35 @@ const matchContext: (level: number) => Effect.Effect<
         )
     )
 
-const generate: Context.Tag.Service<Exercise.Exercise>["generate"] = (level: number) =>
-    Effect.gen(function*() {
-        const contexts = yield* Exercise.generateContexts(matchContext(level))
-
-        let question = ""
-        let answer = ""
-        let i = 0
-        HashSet.forEach(contexts, (ctx) => {
-            const { ans, num1, num2 } = ctx
-            question += `${i + 1}. ${num1} / ${num2} = \n`
-            answer += `${i + 1}. ${num1} / ${num2} = ${ans}\n`
-            i++
-        })
-
-        return { question, answer }
-    })
-
-export const layer: Layer.Layer<Exercise.Exercise, never, never> = Layer.succeed(
+export const layer: Layer.Layer<Exercise.Exercise> = Layer.succeed(
     Exercise.Exercise,
     Exercise.Exercise.of({
         key: "divide",
+        title: "Division",
+        levelDescription: {
+            1: "Simple division with no remainders, using small numbers (e.g., 24 ÷ 6 = 4)",
+            2: "Division of 2-digit numbers with a remainder (e.g., 29 ÷ 5 = 5 R4)",
+            3: "Long division of 3-digit numbers by 1-digit numbers (e.g., 345 ÷ 7)",
+            4: "Division of 5-digit numbers by 2-digit numbers but from multiple of 1-digit number\n" +
+                "(e.g., 86,352 ÷ 56) from 8 * 7 = 56",
+            5: "Division with decimals in the result (e.g., 47 ÷ 8 = 5.875)"
+        },
         availableLevels: 5,
-        generate
+        generate: (level) =>
+            Effect.gen(function*() {
+                const contexts = yield* Exercise.generateContexts(matchContext(level))
+
+                let question = ""
+                let answer = ""
+                let i = 0
+                HashSet.forEach(contexts, (ctx) => {
+                    const { ans, num1, num2 } = ctx
+                    question += `${i + 1}. ${num1} / ${num2} = \n`
+                    answer += `${i + 1}. ${num1} / ${num2} = ${ans}\n`
+                    i++
+                })
+
+                return { question, answer, contexts }
+            })
     })
 )

@@ -7,7 +7,6 @@ This template provides a solid foundation for building scalable and maintainable
 - [ ] Add Addition and Subtraction
 - [ ] Fraction
 - [ ] Answer Checking
-- [ ] Grouping 
 
 ## Running Code
 

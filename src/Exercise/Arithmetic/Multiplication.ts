@@ -12,8 +12,6 @@ const matchContext: (level: number) => Effect.Effect<
     Random.Random
 > = (level) =>
     Match.value<number>(level).pipe(
-        // Level 5: Multiply two numbers with decimals, e.g., 12.34 x 5.67.
-        // This introduces a mix of precision and placement of decimal points.
         Match.when((level) => level === 5, () =>
             Effect.gen(function*() {
                 return new MultiplicationContext(
@@ -21,7 +19,6 @@ const matchContext: (level: number) => Effect.Effect<
                     (yield* randomRange(10000, 100000)) / 100
                 )
             })),
-        // Level 4: Multiply a 5-digit number by a 5-digit number (e.g., 12345 x 67890).
         Match.when((level) => level === 4, () =>
             Effect.gen(function*() {
                 return new MultiplicationContext(
@@ -29,7 +26,6 @@ const matchContext: (level: number) => Effect.Effect<
                     yield* randomRange(10000, 100000)
                 )
             })),
-        // Level 3: Multiply a 4-digit number by a 3-digit number (e.g., 1234 x 567).
         Match.when((level) => level === 3, () =>
             Effect.gen(function*() {
                 return new MultiplicationContext(
@@ -74,6 +70,13 @@ export const layer: Layer.Layer<Exercise.Exercise> = Layer.succeed(
     Exercise.Exercise,
     Exercise.Exercise.of({
         key: "multiply",
+        title: "Multiplication",
+        description: "Description of Multiplication",
+        levelDescription: {
+            3: "Multiply a 4-digit number by a 3-digit number (e.g., 1234 x 567)",
+            4: "Multiply a 5-digit number by a 5-digit number (e.g., 12345 x 67890)",
+            5: "Multiply two numbers with decimals, e.g., 12.34 x 5.67 \n This introduces a max of precision and placement of decimal points."
+        },
         availableLevels: 5,
         generate
     })

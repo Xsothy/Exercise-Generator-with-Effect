@@ -7,6 +7,22 @@ export class Exercise extends Context.Tag("Exercise")<
     Exercise,
     {
         key: string
+        title?: string
+        description?: string
+        availableLevels: null
+        generate: () => Effect.Effect<
+            {
+                question: string
+                answer: string
+            },
+            never,
+            Random.Random | Terminal.Terminal
+        >
+    } | {
+        key: string
+        title?: string
+        description?: string
+        levelDescription?: Record<number, string>
         availableLevels: number
         generate: (level: number) => Effect.Effect<
             {
