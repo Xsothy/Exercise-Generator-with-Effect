@@ -71,11 +71,12 @@ export const layer: Layer.Layer<Exercise.Exercise> = Layer.succeed(
     Exercise.Exercise.of({
         key: "multiply",
         title: "Multiplication",
-        description: "Description of Multiplication",
         levelDescription: {
-            3: "Multiply a 4-digit number by a 3-digit number (e.g., 1234 x 567)",
-            4: "Multiply a 5-digit number by a 5-digit number (e.g., 12345 x 67890)",
-            5: "Multiply two numbers with decimals, e.g., 12.34 x 5.67 \n This introduces a max of precision and placement of decimal points."
+            1: "Multiply fractions with small numbers (e.g., 1/4 × 3/5)",
+            2: "Multiply mixed numbers (e.g., 1 1/3 × 2 2/5)",
+            3: "Multiply fractions and whole numbers (e.g., 3 × 2/5)",
+            4: "Multiply improper fractions (e.g., 11/6 × 13/8)",
+            5: "Real-world scenarios: area of a rectangle with fractional dimensions (e.g., 3/4 × 2/5)"
         },
         availableLevels: 5,
         generate

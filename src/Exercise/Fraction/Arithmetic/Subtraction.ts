@@ -69,13 +69,14 @@ const generate: Context.Tag.Service<Exercise.Exercise>["generate"] = (level: num
 export const layer: Layer.Layer<Exercise.Exercise> = Layer.succeed(
     Exercise.Exercise,
     Exercise.Exercise.of({
-        key: "multiply",
-        title: "Multiplication",
-        description: "Description of Multiplication",
+        key: "subtract",
+        title: "Subtraction",
         levelDescription: {
-            3: "Multiply a 4-digit number by a 3-digit number (e.g., 1234 x 567)",
-            4: "Multiply a 5-digit number by a 5-digit number (e.g., 12345 x 67890)",
-            5: "Multiply two numbers with decimals, e.g., 12.34 x 5.67 \n This introduces a max of precision and placement of decimal points."
+            1: "Subtract fractions with the same denominator (e.g., 3/4 - 1/4)",
+            2: "Subtract fractions with different denominators (e.g., 7/10 - 2/5)",
+            3: "Subtract mixed numbers (e.g., 3 1/2 - 2 2/3)",
+            4: "Subtract improper fractions requiring simplification (e.g., 13/8 - 7/4)",
+            5: "Subtract fractions in real-world scenarios (e.g., remaining pizza: 3/4 - 1/3)"
         },
         availableLevels: 5,
         generate
