@@ -3,7 +3,7 @@ import type { FileSystem, Terminal } from "@effect/platform"
 import { NodeFileSystem, NodeRuntime, NodeTerminal } from "@effect/platform-node"
 import type { PlatformError } from "@effect/platform/Error"
 import type { QuitException } from "@effect/platform/Terminal"
-import { Data, Effect, Layer, Random } from "effect"
+import { Data, DateTime, Effect, Layer, Random } from "effect"
 import { Exercise, Group } from "src/Exercise/index.js"
 import { writeExerciseFiles } from "./writeFile.js"
 import SelectChoice = Prompt.Prompt.SelectChoice
@@ -118,13 +118,20 @@ const chooseExercises: (group: Group.Group["children"], parentGroup?: Group.Grou
             group
         }
     })
+
 const processExercises = (level: number): Effect.Effect<
     void,
     ExerciseError,
     Exercise.Exercise | FileSystem.FileSystem | Terminal.Terminal
 > => Exercise.Exercise.pipe(
     Effect.andThen((exercise) => exercise.generate(level)),
-    Effect.provideService(Random.Random, Random.make("RandomExercise")),
+    Effect.provideService(
+        Random.Random,
+        Random.make(DateTime.now.pipe(
+            Effect.map(DateTime.formatLocal),
+            Effect.runSync
+        ))
+    ),
     Effect.flatMap(
         (exercise) =>
             Effect.map(
@@ -160,7 +167,7 @@ const program: Effect.Effect<
             }
         })
     const { exerciseTypes, level } = yield* chooseExerciseLevel(Group.exercises)
-    return processExercises(level).pipe(
+    return yield* processExercises(level).pipe(
         Effect.provide(exerciseTypes)
     )
 })
