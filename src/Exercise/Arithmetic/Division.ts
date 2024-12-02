@@ -1,19 +1,25 @@
 import type { Random } from "effect"
-import { Effect, HashSet, Layer, Match } from "effect"
+import { Effect, Equal, Hash, HashSet, Layer, Match } from "effect"
 import { Exercise } from "src/Exercise/index.js"
 import { randomRange } from "src/utils.js"
 
-class DivisionContext extends Exercise.ExerciseContext {
-    constructor(
-        readonly num1: number,
-        readonly num2: number,
-        readonly ans: string
-    ) {
-        super(num1, num2)
+class DivisionContext extends Exercise.ExerciseContext<{ num1: number; num2: number; ans: string }> {
+    static make({ ans, num1, num2 }: { num1: number; num2: number; ans: string }) {
+        return new DivisionContext({ num1, num2, ans })
     }
 
-    static make({ ans, num1, num2 }: { num1: number; num2: number; ans: string }) {
-        return new DivisionContext(num1, num2, ans)
+    [Equal.symbol](that: Equal.Equal): boolean {
+        if (that instanceof DivisionContext) {
+            return (
+                Equal.equals(this.ctx.num1, that.ctx.num1) &&
+                Equal.equals(this.ctx.num2, that.ctx.num2)
+            )
+        }
+        return false
+    }
+
+    [Hash.symbol](): number {
+        return Hash.hash(parseInt(`${this.ctx.num1}${this.ctx.num2}`))
     }
 }
 
@@ -128,7 +134,7 @@ export const layer: Layer.Layer<Exercise.Exercise> = Layer.succeed(
                 let answer = ""
                 let i = 0
                 HashSet.forEach(contexts, (ctx) => {
-                    const { ans, num1, num2 } = ctx
+                    const { ans, num1, num2 } = ctx.ctx
                     question += `${i + 1}. ${num1} / ${num2} = \n`
                     answer += `${i + 1}. ${num1} / ${num2} = ${ans}\n`
                     i++

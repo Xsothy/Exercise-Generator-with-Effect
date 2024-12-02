@@ -2,6 +2,7 @@ import { Prompt } from "@effect/cli"
 import type { Terminal } from "@effect/platform"
 import type { Random } from "effect"
 import { Context, Effect, Equal, Hash, HashSet } from "effect"
+import type SkipGenerateException from "src/Exception/SkipGenerateException.js"
 
 export class Exercise extends Context.Tag("Exercise")<
     Exercise,
@@ -36,32 +37,21 @@ export class Exercise extends Context.Tag("Exercise")<
 >() {
 }
 
-export abstract class ExerciseContext implements Equal.Equal {
+export abstract class ExerciseContext<T = any> implements Equal.Equal {
     constructor(
-        readonly num1: number,
-        readonly num2: number
+        readonly ctx: T
     ) {
     }
 
-    [Equal.symbol](that: Equal.Equal): boolean {
-        if (that instanceof ExerciseContext) {
-            return (
-                Equal.equals(this.num1, that.num1) &&
-                Equal.equals(this.num2, that.num2)
-            )
-        }
-        return false
-    }
+    abstract [Equal.symbol](that: Equal.Equal): boolean
 
-    [Hash.symbol](): number {
-        return Hash.hash(parseInt(`${this.num1}${this.num2}`))
-    }
+    abstract [Hash.symbol](): number
 }
 
-export function generateContexts<T extends ExerciseContext>(
+export function generateContexts<T extends ExerciseContext = any>(
     context: Effect.Effect<
         T,
-        never,
+        SkipGenerateException,
         Random.Random
     >
 ): Effect.Effect<
@@ -84,11 +74,16 @@ export function generateContexts<T extends ExerciseContext>(
         }
 
         while (HashSet.size(contexts) < qty) {
-            const generated = yield* context
+            const generated = yield* context.pipe(
+                Effect.catchTag("SkipGenerateException", () => Effect.succeed(null))
+            )
+
+            if (!generated) continue
 
             if (!HashSet.has(contexts, generated)) {
-                console.log(HashSet.size(contexts))
+                console.log(HashSet.size(contexts) + 1)
                 HashSet.add(contexts, generated)
+                console.log("Done " + HashSet.size(contexts))
 
                 HashSet.filter(duplicationContexts, () => false)
             } else if (!HashSet.has(duplicationContexts, generated)) {

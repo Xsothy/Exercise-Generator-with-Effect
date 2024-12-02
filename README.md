@@ -5,8 +5,10 @@ This template provides a solid foundation for building scalable and maintainable
 ## Todo
 - [ ] Add automatic Testing
 - [ ] Add Addition and Subtraction
-- [ ] Fraction
+- [ ] Implement Fraction
 - [ ] Answer Checking
+- [ ] Bug back not work on deep 3 level
+- [ ] Implement Route for navigating
 
 ## Running Code
 
