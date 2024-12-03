@@ -1,4 +1,4 @@
-import { BigDecimal, BigInt, Equal, Hash, Option } from "effect"
+import { BigDecimal, BigInt, Equal, Hash, Option, pipe } from "effect"
 
 export class Fraction implements Equal.Equal {
     constructor(
@@ -31,14 +31,19 @@ export class Fraction implements Equal.Equal {
     }
 
     toMixed(): Fraction {
-        console.log(this.numerator, this.denominator)
         const numeratorDecimal = BigDecimal.fromBigInt(this.numerator)
         const denominatorDecimal = BigDecimal.fromBigInt(this.denominator)
         const remainder = BigDecimal.unsafeRemainder(numeratorDecimal, denominatorDecimal)
+        const whole = pipe(
+            BigInt.unsafeDivide(this.numerator, this.denominator),
+            BigInt.sum(this.whole ?? 0n),
+            BigDecimal.fromBigInt,
+            BigDecimal.isNegative(remainder) ? BigDecimal.negate : (_) => _
+        )
         return new Fraction(
-            remainder.value,
+            BigDecimal.abs(remainder).value,
             this.denominator,
-            BigInt.unsafeDivide(this.numerator, this.denominator) + (this.whole ?? 0n)
+            whole.value
         )
     }
 
