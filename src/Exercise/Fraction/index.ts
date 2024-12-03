@@ -1,11 +1,13 @@
-import { BigInt, Equal, Hash, Option } from "effect"
+import { BigDecimal, BigInt, Equal, Hash, Option } from "effect"
 
 export class Fraction implements Equal.Equal {
     constructor(
         readonly numerator: bigint,
-        readonly denominator: bigint
+        readonly denominator: bigint,
+        readonly whole?: bigint
     ) {
     }
+
     [Equal.symbol](that: Equal.Equal): boolean {
         if (that instanceof Fraction) {
             return (
@@ -17,7 +19,7 @@ export class Fraction implements Equal.Equal {
     }
 
     [Hash.symbol](): number {
-        return (parseInt(`${this.numerator}${this.denominator}`))
+        return (parseInt(`${this.whole ?? ""}${this.numerator}${this.denominator}`))
     }
 
     get simplify(): Fraction {
@@ -28,18 +30,38 @@ export class Fraction implements Equal.Equal {
         )
     }
 
-    toNumber(): {
-        numerator: number
-        denominator: number
-    } {
-        return {
+    toMixed(): Fraction {
+        console.log(this.numerator, this.denominator)
+        const numeratorDecimal = BigDecimal.fromBigInt(this.numerator)
+        const denominatorDecimal = BigDecimal.fromBigInt(this.denominator)
+        const remainder = BigDecimal.unsafeRemainder(numeratorDecimal, denominatorDecimal)
+        return new Fraction(
+            remainder.value,
+            this.denominator,
+            BigInt.unsafeDivide(this.numerator, this.denominator) + (this.whole ?? 0n)
+        )
+    }
+
+    toNumber() {
+        const obj: {
+            numerator: number
+            denominator: number
+            whole?: number
+        } = {
             numerator: Option.getOrThrow(BigInt.toNumber(this.numerator)),
             denominator: Option.getOrThrow(BigInt.toNumber(this.denominator))
         }
+        if (this.whole) {
+            obj.whole = Option.getOrThrow(BigInt.toNumber(this.whole))
+        }
+        return obj
     }
 
     get display(): string {
-        const { denominator, numerator } = this.toNumber()
+        const { denominator, numerator, whole } = this.toNumber()
+        if (whole) {
+            return `${whole} ${numerator}/${denominator}`
+        }
         return `${numerator}/${denominator}`
     }
 }

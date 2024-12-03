@@ -31,6 +31,108 @@ const matchContext: (level: number) => Effect.Effect<
     Random.Random
 > = (level) =>
     Match.value<number>(level).pipe(
+        Match.when((level) => level === 4, () =>
+            Effect.gen(function*() {
+                const denominator1 = yield* randomBigIntRange(2, 20)
+                const denominator2 = yield* randomBigIntRange(2, 20)
+                const numerator1 = yield* randomBigIntRange(2, BigInt.increment(denominator1))
+                const numerator2 = yield* randomBigIntRange(2, BigInt.increment(denominator2))
+
+                // skip if their a remainder of both side is 0
+                if (
+                    (
+                        BigDecimal.unsafeRemainder(
+                                BigDecimal.fromBigInt(denominator1),
+                                BigDecimal.fromBigInt(numerator1)
+                            ).value === 0n ||
+                        BigDecimal.unsafeRemainder(
+                                BigDecimal.fromBigInt(denominator2),
+                                BigDecimal.fromBigInt(numerator2)
+                            ).value === 0n
+                    ) && (
+                        BigInt.greaterThanOrEqualTo(numerator1, denominator1)
+                        || BigInt.greaterThanOrEqualTo(numerator2, denominator2)
+                    )
+                ) yield* new SkipGenerateException()
+
+                const num1 = new Fraction(
+                    numerator1,
+                    denominator1
+                )
+                const num2 = new Fraction(
+                    numerator2,
+                    denominator2
+                )
+
+                if (
+                    Equal.equals(num1.simplify, num1)
+                    || Equal.equals(num2.simplify, num2)
+                ) yield* new SkipGenerateException()
+
+                const lcm = BigInt.lcm(denominator1, denominator2)
+
+                const ans = new Fraction(
+                    lcm / denominator1 * num1.numerator + lcm / denominator2 * num2.numerator,
+                    lcm
+                ).simplify
+
+                return new AdditionContext({
+                    num1,
+                    num2,
+                    ans
+                })
+            })),
+        Match.when((level) => level === 3, () =>
+            Effect.gen(function*() {
+                const denominator1 = yield* randomBigIntRange(2, 10)
+                const denominator2 = yield* randomBigIntRange(2, 10)
+                const numerator1 = yield* randomBigIntRange(2, BigInt.increment(denominator1))
+                const numerator2 = yield* randomBigIntRange(2, BigInt.increment(denominator2))
+                const whole1 = yield* randomBigIntRange(1, 4)
+                const whole2 = yield* randomBigIntRange(1, 4)
+
+                // skip if their a remainder of both side is 0
+                if (
+                    (
+                        BigDecimal.unsafeRemainder(
+                                BigDecimal.fromBigInt(denominator1),
+                                BigDecimal.fromBigInt(numerator1)
+                            ).value === 0n
+                        || BigDecimal.unsafeRemainder(
+                                BigDecimal.fromBigInt(denominator2),
+                                BigDecimal.fromBigInt(numerator2)
+                            ).value === 0n
+                    ) && (
+                        BigInt.greaterThanOrEqualTo(numerator1, denominator1)
+                        || BigInt.greaterThanOrEqualTo(numerator2, denominator2)
+                    )
+                ) yield* new SkipGenerateException()
+
+                const num1 = new Fraction(
+                    numerator1,
+                    denominator1,
+                    whole1
+                )
+                const num2 = new Fraction(
+                    numerator2,
+                    denominator2,
+                    whole2
+                )
+
+                const lcm = BigInt.lcm(denominator1, denominator2)
+
+                const ans = new Fraction(
+                    lcm / denominator1 * num1.numerator + lcm / denominator2 * num2.numerator,
+                    lcm,
+                    (num1.whole ?? 0n) + (num2.whole ?? 0n)
+                ).toMixed()
+
+                return new AdditionContext({
+                    num1,
+                    num2,
+                    ans
+                })
+            })),
         Match.when((level) => level === 2, () =>
             Effect.gen(function*() {
                 const denominator1 = yield* randomBigIntRange(2, 10)
@@ -38,15 +140,16 @@ const matchContext: (level: number) => Effect.Effect<
                 const numerator1 = yield* randomBigIntRange(2, BigInt.increment(denominator1))
                 const numerator2 = yield* randomBigIntRange(2, BigInt.increment(denominator2))
 
-                // skip if there a remainder of both side is 0
+                // skip if their a remainder of both side is 0
+                // skip if their a remainder of both side is 0
                 if (
                     BigDecimal.unsafeRemainder(
-                            BigDecimal.fromBigInt(numerator1),
-                            BigDecimal.fromBigInt(denominator1)
+                            BigDecimal.fromBigInt(denominator1),
+                            BigDecimal.fromBigInt(numerator1)
                         ).value === 0n ||
                     BigDecimal.unsafeRemainder(
-                            BigDecimal.fromBigInt(numerator2),
-                            BigDecimal.fromBigInt(denominator2)
+                            BigDecimal.fromBigInt(denominator2),
+                            BigDecimal.fromBigInt(numerator2)
                         ).value === 0n
                 ) yield* new SkipGenerateException()
 
@@ -62,7 +165,7 @@ const matchContext: (level: number) => Effect.Effect<
                 const lcm = BigInt.lcm(denominator1, denominator2)
 
                 const ans = new Fraction(
-                    lcm * num1.numerator + lcm * num2.numerator,
+                    lcm / denominator1 * num1.numerator + lcm / denominator2 * num2.numerator,
                     lcm
                 )
 

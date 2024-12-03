@@ -29,9 +29,9 @@
     "changeset-publish": "pnpm build && TEST_DIST= pnpm vitest && changeset publish"
   },
   "dependencies": {
-    "@effect/cli": "^0.48.25",
-    "@effect/platform": "^0.69.25",
-    "@effect/platform-node": "^0.64.27",
+    "@effect/cli": "^0.48.31",
+    "@effect/platform": "^0.69.31",
+    "@effect/platform-node": "^0.64.33",
     "effect": "latest"
   },
   "devDependencies": {
@@ -48,11 +48,11 @@
     "@eslint/compat": "1.1.1",
     "@eslint/eslintrc": "3.1.0",
     "@eslint/js": "9.10.0",
-    "@types/node": "^22.9.3",
-    "@typescript-eslint/eslint-plugin": "^8.15.0",
-    "@typescript-eslint/parser": "^8.15.0",
+    "@types/node": "^22.10.1",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
     "babel-plugin-annotate-pure-calls": "^0.4.0",
-    "eslint": "^9.15.0",
+    "eslint": "^9.16.0",
     "eslint-import-resolver-typescript": "^3.6.3",
     "eslint-plugin-codegen": "^0.28.0",
     "eslint-plugin-deprecation": "^3.0.0",
@@ -61,7 +61,7 @@
     "eslint-plugin-sort-destructure-keys": "^2.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.5"
+    "vitest": "^2.1.8"
   },
   "effect": {
     "generateExports": {
