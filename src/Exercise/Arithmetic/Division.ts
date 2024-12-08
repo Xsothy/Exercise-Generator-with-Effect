@@ -1,11 +1,20 @@
 import type { Random } from "effect"
-import { Effect, Equal, Hash, HashSet, Layer, Match } from "effect"
+import { BigDecimal, BigInt, Effect, Equal, Hash, HashSet, Layer, Match } from "effect"
+import SkipGenerateException from "src/Exception/SkipGenerateException.js"
 import { Exercise } from "src/Exercise/index.js"
-import { randomRange } from "src/utils.js"
+import { randomBigIntRange } from "src/utils.js"
 
-class DivisionContext extends Exercise.ExerciseContext<{ num1: number; num2: number; ans: string }> {
-    static make({ ans, num1, num2 }: { num1: number; num2: number; ans: string }) {
-        return new DivisionContext({ num1, num2, ans })
+class DivisionContext extends Exercise.ExerciseContext<{
+    num1: BigDecimal.BigDecimal
+    num2: BigDecimal.BigDecimal
+    ans: string
+}> {
+    static make({ ans, num1, num2 }: { num1: bigint; num2: bigint; ans: string }) {
+        return new DivisionContext({
+            num1: BigDecimal.fromBigInt(num1),
+            num2: BigDecimal.fromBigInt(num2),
+            ans
+        })
     }
 
     [Equal.symbol](that: Equal.Equal): boolean {
@@ -19,68 +28,57 @@ class DivisionContext extends Exercise.ExerciseContext<{ num1: number; num2: num
     }
 
     [Hash.symbol](): number {
-        return Hash.hash(parseInt(`${this.ctx.num1}${this.ctx.num2}`))
+        return parseInt(`${BigDecimal.unsafeToNumber(this.ctx.num1)}${BigDecimal.unsafeToNumber(this.ctx.num2)}`)
     }
 }
 
 const matchContext: (level: number) => Effect.Effect<
     DivisionContext,
-    never,
+    SkipGenerateException,
     Random.Random
 > = (level) =>
     Match.value<number>(level).pipe(
         Match.when((level) => level === 5, () =>
             Effect.gen(function*() {
-                const generateNum = yield* Effect.iterate(
-                    {
-                        num1: yield* randomRange(1000, 10000),
-                        num2: yield* randomRange(2, 10)
-                    },
-                    {
-                        while: ({ num1, num2 }) => (
-                            Math.ceil(num1 / num2) === num1 / num2
-                            || Math.ceil(num1 / num2 * 1000) !== num1 / num2 * 1000
-                        ),
-                        body: () =>
-                            Effect.gen(function*() {
-                                return {
-                                    num1: yield* randomRange(100, 1000),
-                                    num2: yield* randomRange(2, 10)
-                                }
-                            })
-                    }
+                const num1 = yield* randomBigIntRange(1000, 10000).pipe(
+                    Effect.andThen(BigDecimal.fromBigInt)
                 )
+                const num2 = yield* randomBigIntRange(2, 10).pipe(
+                    Effect.andThen(BigDecimal.fromBigInt)
+                )
+
+                const answer = BigDecimal.unsafeDivide(num1, num2)
+
+                if (answer.scale < 1 || answer.scale > 3) yield* new SkipGenerateException()
+
                 return DivisionContext.make({
-                    num1: generateNum.num1,
-                    num2: generateNum.num2,
-                    ans: (generateNum.num1 / generateNum.num2).toString()
+                    num1: num1.value,
+                    num2: num2.value,
+                    ans: BigDecimal.unsafeToNumber(answer).toString()
                 })
             })),
         Match.when((level) => level === 4, () =>
             Effect.gen(function*() {
-                const num1 = yield* randomRange(100, 1000)
-                const num2 = yield* Effect.iterate(
-                    0,
-                    {
-                        while: (state) => state < 10,
-                        body: () =>
-                            Effect.gen(function*() {
-                                return (yield* randomRange(2, 10)) * (yield* randomRange(2, 10))
-                            })
-                    }
-                )
+                const num1 = yield* randomBigIntRange(100, 1000)
+                const num2 = BigInt.multiply(yield* randomBigIntRange(2, 10), yield* randomBigIntRange(2, 10))
+
+                if (num2 < 10n) yield* new SkipGenerateException()
+
                 return DivisionContext.make({
-                    num1: num1 * num2,
+                    num1: BigInt.unsafeDivide(num1, num2),
                     num2,
                     ans: num1.toString()
                 })
             })),
         Match.when((level) => level === 3, () =>
             Effect.gen(function*() {
-                const num1 = yield* randomRange(100, 1000)
-                const num2 = yield* randomRange(2, 10)
-                const answer = Math.ceil(num1 / num2)
-                const remainder = num1 % num2
+                const num1 = yield* randomBigIntRange(100, 1000)
+                const num2 = yield* randomBigIntRange(2, 10)
+                const answer = BigInt.unsafeDivide(num1, num2)
+                const remainder = BigDecimal.unsafeRemainder(
+                    BigDecimal.fromBigInt(num1),
+                    BigDecimal.fromBigInt(num2)
+                ).value
                 return DivisionContext.make({
                     num1,
                     num2,
@@ -89,22 +87,28 @@ const matchContext: (level: number) => Effect.Effect<
             })),
         Match.when((level) => level === 2, () =>
             Effect.gen(function*() {
-                const num1 = yield* randomRange(10, 100)
-                const num2 = yield* randomRange(2, 10)
-                const answer = Math.ceil(num1 / num2)
-                const remainder = num1 % num2
+                const num1 = yield* randomBigIntRange(10, 100)
+                const num2 = yield* randomBigIntRange(2, 10)
+                const answer = BigInt.unsafeDivide(num1, num2)
+                const remainder = BigDecimal.unsafeRemainder(
+                    BigDecimal.fromBigInt(num1),
+                    BigDecimal.fromBigInt(num2)
+                ).value
+
+                if (remainder === 0n) yield* new SkipGenerateException()
+
                 return DivisionContext.make({
                     num1,
                     num2,
-                    ans: `${answer} R${remainder}`
+                    ans: `${answer} R${remainder.toString()}`
                 })
             })),
         Match.orElse(() =>
             Effect.gen(function*() {
-                const num1 = yield* randomRange(2, 10)
-                const num2 = yield* randomRange(2, 10)
+                const num1 = yield* randomBigIntRange(2, 10)
+                const num2 = yield* randomBigIntRange(2, 10)
                 return DivisionContext.make({
-                    num1: num1 * num2,
+                    num1: BigInt.multiply(num1, num2),
                     num2,
                     ans: num1.toString()
                 })
@@ -135,8 +139,8 @@ export const layer: Layer.Layer<Exercise.Exercise> = Layer.succeed(
                 let i = 0
                 HashSet.forEach(contexts, (ctx) => {
                     const { ans, num1, num2 } = ctx.ctx
-                    question += `${i + 1}. ${num1} / ${num2} = \n`
-                    answer += `${i + 1}. ${num1} / ${num2} = ${ans}\n`
+                    question += `${i + 1}. ${num1.value.toString()} / ${num2.value.toString()} = \n`
+                    answer += `${i + 1}. ${num1.value.toString()} / ${num2.value.toString()} = ${ans}\n`
                     i++
                 })
 

@@ -1,16 +1,16 @@
 import type { Context, Random } from "effect"
-import { Effect, Equal, Hash, HashSet, Layer, Match } from "effect"
+import { BigDecimal, Effect, Equal, Hash, HashSet, Layer, Match } from "effect"
 import { Exercise } from "src/Exercise/index.js"
 import { randomRange } from "src/utils.js"
 
 class MultiplicationContext extends Exercise.ExerciseContext<{
-    num1: number
-    num2: number
+    num1: BigDecimal.BigDecimal
+    num2: BigDecimal.BigDecimal
 }> {
     constructor(num1: number, num2: number) {
         super({
-            num1,
-            num2
+            num1: BigDecimal.unsafeFromNumber(num1),
+            num2: BigDecimal.unsafeFromNumber(num2)
         })
     }
     [Equal.symbol](that: Equal.Equal): boolean {
@@ -23,7 +23,7 @@ class MultiplicationContext extends Exercise.ExerciseContext<{
         return false
     }
     [Hash.symbol](): number {
-        return Hash.hash(parseInt(`${this.ctx.num1}${this.ctx.num2}`))
+        return Hash.hash(this.ctx)
     }
 }
 
@@ -36,8 +36,8 @@ const matchContext: (level: number) => Effect.Effect<
         Match.when((level) => level === 5, () =>
             Effect.gen(function*() {
                 return new MultiplicationContext(
-                    (yield* randomRange(10000, 100000)) / 100,
-                    (yield* randomRange(10000, 100000)) / 100
+                    (yield* randomRange(1000, 10000)) / 100,
+                    (yield* randomRange(1000, 10000)) / 100
                 )
             })),
         Match.when((level) => level === 4, () =>
@@ -79,8 +79,10 @@ const generate: Context.Tag.Service<Exercise.Exercise>["generate"] = (level: num
         let i = 0
         HashSet.forEach(contexts, (ctx) => {
             const { num1, num2 } = ctx.ctx
-            question += `${i + 1}. ${num1} * ${num2} = \n`
-            answer += `${i + 1}. ${num1} * ${num2} = ${(num1 * num2).toLocaleString()}\n`
+            question += `${i + 1}. ${BigDecimal.format(num1)} * ${BigDecimal.format(num2)} = \n`
+            answer += `${i + 1}. ${BigDecimal.format(num1)} * ${BigDecimal.format(num2)} = ${
+                BigDecimal.format(BigDecimal.multiply(num1, num2))
+            }\n`
             i++
         })
 
