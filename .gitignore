@@ -8,7 +8,7 @@ build/
 docs/
 dist/*
 build/*
-file/*
+file/
 scratchpad/*
 !scratchpad/tsconfig.json
 .direnv/

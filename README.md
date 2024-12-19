@@ -4,7 +4,8 @@ This template provides a solid foundation for building scalable and maintainable
 
 ## Todo
 - [ ] Add Automatic Testing
-- [ ] Add Multiplication and Division
+- [ ] Add Division
+- [ ] Fix Improper Fraction
 - [ ] Implement Fraction
 - [ ] Answer Checking
 - [ ] Bug back not work on deep 3 level

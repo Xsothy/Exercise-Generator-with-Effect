@@ -1,7 +1,7 @@
 import type { Context, Random } from "effect"
-import { BigDecimal, BigInt, Effect, Equal, Hash, HashSet, Layer, Match, pipe } from "effect"
+import { BigInt, Effect, Equal, Hash, HashSet, Layer, Match, pipe } from "effect"
 import SkipGenerateException from "src/Exception/SkipGenerateException.js"
-import { Fraction } from "src/Exercise/Fraction/index.js"
+import { Fraction, SkipNoRemainder } from "src/Exercise/Fraction/Fraction.js"
 import { Exercise } from "src/Exercise/index.js"
 import { randomBigIntRange } from "src/utils.js"
 
@@ -38,23 +38,6 @@ const matchContext: (level: number) => Effect.Effect<
                 const numerator1 = yield* randomBigIntRange(2, BigInt.increment(denominator1))
                 const numerator2 = yield* randomBigIntRange(2, BigInt.increment(denominator2))
 
-                // skip if their a remainder of both side is 0
-                if (
-                    (
-                        BigDecimal.unsafeRemainder(
-                                BigDecimal.fromBigInt(denominator1),
-                                BigDecimal.fromBigInt(numerator1)
-                            ).value === 0n ||
-                        BigDecimal.unsafeRemainder(
-                                BigDecimal.fromBigInt(denominator2),
-                                BigDecimal.fromBigInt(numerator2)
-                            ).value === 0n
-                    ) && (
-                        BigInt.greaterThanOrEqualTo(numerator1, denominator1)
-                        || BigInt.greaterThanOrEqualTo(numerator2, denominator2)
-                    )
-                ) yield* new SkipGenerateException()
-
                 const num1 = new Fraction(
                     numerator1,
                     denominator1
@@ -63,6 +46,9 @@ const matchContext: (level: number) => Effect.Effect<
                     numerator2,
                     denominator2
                 )
+
+                yield* SkipNoRemainder(num1)
+                yield* SkipNoRemainder(num2)
 
                 if (
                     Equal.equals(num1.simplify, num1)
@@ -91,21 +77,9 @@ const matchContext: (level: number) => Effect.Effect<
                 const whole1 = yield* randomBigIntRange(1, 4)
                 const whole2 = yield* randomBigIntRange(1, 4)
 
-                // skip if their a remainder of both side is 0
                 if (
-                    (
-                        BigDecimal.unsafeRemainder(
-                                BigDecimal.fromBigInt(denominator1),
-                                BigDecimal.fromBigInt(numerator1)
-                            ).value === 0n
-                        || BigDecimal.unsafeRemainder(
-                                BigDecimal.fromBigInt(denominator2),
-                                BigDecimal.fromBigInt(numerator2)
-                            ).value === 0n
-                    ) && (
-                        BigInt.greaterThanOrEqualTo(numerator1, denominator1)
-                        || BigInt.greaterThanOrEqualTo(numerator2, denominator2)
-                    )
+                    BigInt.greaterThanOrEqualTo(numerator1, denominator1)
+                    || BigInt.greaterThanOrEqualTo(numerator2, denominator2)
                 ) yield* new SkipGenerateException()
 
                 const num1 = new Fraction(
@@ -118,6 +92,9 @@ const matchContext: (level: number) => Effect.Effect<
                     denominator2,
                     whole2
                 )
+
+                yield* SkipNoRemainder(num1)
+                yield* SkipNoRemainder(num2)
 
                 const lcm = BigInt.lcm(denominator1, denominator2)
 
@@ -140,19 +117,6 @@ const matchContext: (level: number) => Effect.Effect<
                 const numerator1 = yield* randomBigIntRange(2, BigInt.increment(denominator1))
                 const numerator2 = yield* randomBigIntRange(2, BigInt.increment(denominator2))
 
-                // skip if their a remainder of both side is 0
-                // skip if their a remainder of both side is 0
-                if (
-                    BigDecimal.unsafeRemainder(
-                            BigDecimal.fromBigInt(denominator1),
-                            BigDecimal.fromBigInt(numerator1)
-                        ).value === 0n ||
-                    BigDecimal.unsafeRemainder(
-                            BigDecimal.fromBigInt(denominator2),
-                            BigDecimal.fromBigInt(numerator2)
-                        ).value === 0n
-                ) yield* new SkipGenerateException()
-
                 const num1 = new Fraction(
                     numerator1,
                     denominator1
@@ -161,6 +125,9 @@ const matchContext: (level: number) => Effect.Effect<
                     numerator2,
                     denominator2
                 )
+
+                yield* SkipNoRemainder(num1)
+                yield* SkipNoRemainder(num2)
 
                 const lcm = BigInt.lcm(denominator1, denominator2)
 
@@ -181,18 +148,6 @@ const matchContext: (level: number) => Effect.Effect<
                 const numerator1 = yield* randomBigIntRange(2, 10)
                 const numerator2 = yield* randomBigIntRange(2, 10)
 
-                // skip if there a remainder of both side is 0
-                if (
-                    BigDecimal.unsafeRemainder(
-                            BigDecimal.fromBigInt(numerator1),
-                            BigDecimal.fromBigInt(denominator)
-                        ).value === 0n ||
-                    BigDecimal.unsafeRemainder(
-                            BigDecimal.fromBigInt(numerator2),
-                            BigDecimal.fromBigInt(denominator)
-                        ).value === 0n
-                ) yield* new SkipGenerateException()
-
                 const num1 = new Fraction(
                     numerator1,
                     denominator
@@ -201,6 +156,9 @@ const matchContext: (level: number) => Effect.Effect<
                     numerator2,
                     denominator
                 )
+
+                yield* SkipNoRemainder(num1)
+                yield* SkipNoRemainder(num2)
 
                 const ans = new Fraction(
                     num1.numerator + num2.numerator,

@@ -65,7 +65,7 @@ const matchContext: (level: number) => Effect.Effect<
                 if (num2 < 10n) yield* new SkipGenerateException()
 
                 return DivisionContext.make({
-                    num1: BigInt.unsafeDivide(num1, num2),
+                    num1: BigInt.multiply(num1, num2),
                     num2,
                     ans: num1.toString()
                 })
