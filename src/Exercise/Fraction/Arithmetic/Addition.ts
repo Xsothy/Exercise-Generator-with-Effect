@@ -39,11 +39,11 @@ const matchContext: (level: number) => Effect.Effect<
                 const numerator2 = yield* randomBigIntRange(2, BigInt.increment(denominator2))
 
                 const num1 = new Fraction(
-                    numerator1,
+                    denominator1 + numerator1,
                     denominator1
                 )
                 const num2 = new Fraction(
-                    numerator2,
+                    denominator2 + numerator2,
                     denominator2
                 )
 

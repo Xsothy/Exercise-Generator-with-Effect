@@ -31,7 +31,6 @@ const matchContext: (level: number) => Effect.Effect<
     Random.Random
 > = (level) =>
     Match.value<number>(level).pipe(
-        // TODO: Fix bug some answer is negative
         Match.when((level) => level === 4, () =>
             Effect.gen(function*() {
                 const denominator1 = yield* randomBigIntRange(2, 20)
@@ -40,11 +39,11 @@ const matchContext: (level: number) => Effect.Effect<
                 const numerator2 = yield* randomBigIntRange(2, BigInt.increment(denominator2))
 
                 const num1 = new Fraction(
-                    numerator1,
+                    denominator1 + numerator1,
                     denominator1
                 )
                 const num2 = new Fraction(
-                    numerator2,
+                    denominator2 + numerator2,
                     denominator2
                 )
 
