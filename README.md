@@ -30,14 +30,21 @@ sheet) always reproduces the same questions and the same answer key.
 | Fractions  | Mixed number → improper fraction  | 5      |
 | Fractions  | Comparing fractions               | 4      |
 
-## How answers are checked
+## How answers are entered and checked
 
-- **Numbers**: `1,234.50` and `1234.5` are the same answer.
-- **Division with remainders**: type `5 R4` (also `5r4` or `5 remainder 4`).
-- **Fractions**: type `3/4`, or `1 3/4` for a mixed number. The value must be right *and* in
-  lowest terms; an answer such as `2/4` is marked "right value — now simplify it" rather
-  than simply wrong. The conversion topics also insist on the form they ask for.
+Answers go into boxes shaped like the answer, and each box only accepts the characters that
+belong in it, so there is no format to remember.
+
+- **Numbers**: one box. `1,234.50` and `1234.5` are the same answer.
+- **Division with remainders**: a quotient box and a remainder box.
+- **Fractions**: a numerator box over a denominator box, with a whole-number box in front
+  when the answer may be a mixed number. The value must be right *and* in lowest terms; an
+  answer such as `2/4` is marked "right value — now simplify it" rather than simply wrong.
+  The conversion topics also insist on the form they ask for.
 - **Comparisons**: choose `<`, `=` or `>`.
+
+Keyboard: `Enter` moves to the next box, and typing an answer the way it is said aloud
+(`1 3/4`, `5r4`) walks through its boxes.
 
 ## Running it
 
@@ -70,7 +77,8 @@ src/core/               no DOM, no I/O — usable from any front end
   Topic.ts              topic / level definitions
   exercises/            the generators themselves
   Catalog.ts            list of topics and `generateWorksheet(spec)`
-  Check.ts              marks a typed answer against the model answer
+  Entry.ts              which answer boxes a problem needs, and their input masks
+  Check.ts              marks an answer against the model answer
 src/web/                the website (plain TypeScript + CSS, built with Vite)
 test/                   vitest tests
 ```

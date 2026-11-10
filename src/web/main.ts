@@ -1,4 +1,4 @@
-import { Catalog, Check, Problem } from "../core/index.js"
+import { Catalog, Check, Entry, Problem } from "../core/index.js"
 import type { Topic } from "../core/index.js"
 import { h } from "./dom.js"
 import { renderToken, renderTokens } from "./render.js"
@@ -32,8 +32,8 @@ const specHash = (spec: Catalog.WorksheetSpec): string =>
 
 let spec = readSpec()
 let problems: Array<Problem.Problem> = []
-/** What the student has entered so far, by question index. */
-let responses: Array<string> = []
+/** What the student has entered so far: one string per answer box, by question index. */
+let responses: Array<Array<string>> = []
 let checked = false
 
 const app = document.getElementById("app")!
@@ -46,7 +46,7 @@ const update = (changes: Partial<Catalog.WorksheetSpec>): void => {
 
 const regenerate = (): void => {
     problems = Catalog.generateWorksheet(spec)
-    responses = problems.map(() => "")
+    responses = problems.map((problem) => Entry.fields(problem).map(() => ""))
     checked = false
     render()
 }
@@ -145,7 +145,8 @@ const renderControls = (): HTMLElement => {
 let printAnswerKey = true
 let showAnswerKey = false
 
-const verdictOf = (index: number): Check.Verdict => Check.check(problems[index]!.answer, responses[index]!)
+const verdictOf = (index: number): Check.Verdict =>
+    Check.check(problems[index]!.answer, Entry.compose(Entry.fields(problems[index]!), responses[index]!))
 
 const feedback = (index: number): HTMLElement | false => {
     if (!checked) return false
@@ -172,55 +173,116 @@ const feedback = (index: number): HTMLElement | false => {
     }
 }
 
-/** Editing an answer after marking clears the marks, so stale ticks never linger. */
-const setResponse = (index: number, input: HTMLInputElement): void => {
-    responses[index] = input.value
-    if (checked) {
-        checked = false
-        render({ focus: index, caret: input.selectionStart ?? input.value.length })
-    }
+const boxLabels: Record<Entry.Field, string> = {
+    value: "Answer",
+    whole: "Whole number",
+    numerator: "Numerator",
+    denominator: "Denominator",
+    quotient: "Quotient",
+    remainder: "Remainder",
+    sign: "Sign"
+}
+
+const focusBox = (index: number, part: number): void => {
+    const box = app.querySelector<HTMLInputElement>(`.sheet input.box[data-index="${index}"][data-part="${part}"]`)
+    box?.focus()
+    box?.select()
+}
+
+/** Every answer box on the sheet, in reading order. */
+const allBoxes = (): Array<HTMLInputElement> => [...app.querySelectorAll<HTMLInputElement>(".sheet input.box")]
+
+/**
+ * One masked answer box. Only characters that can belong to the answer are
+ * kept, and editing after marking clears the marks so stale ticks never linger.
+ */
+const box = (index: number, part: number, field: Entry.Field): HTMLInputElement => {
+    const input = h("input", {
+        type: "text",
+        class: `box box-${field}`,
+        value: responses[index]![part]!,
+        inputmode: field === "value" ? "decimal" : "numeric",
+        maxlength: field === "value" ? 14 : 4,
+        "data-index": index,
+        "data-part": part,
+        "aria-label": `Question ${index + 1}: ${boxLabels[field]}`,
+        autocomplete: "off"
+    })
+    input.addEventListener("input", () => {
+        const masked = Entry.mask(field, input.value)
+        if (masked !== input.value) {
+            const caret = Math.max(0, (input.selectionStart ?? masked.length) - (input.value.length - masked.length))
+            input.value = masked
+            input.setSelectionRange(caret, caret)
+        }
+        responses[index]![part] = masked
+        if (checked) {
+            checked = false
+            render({ index, part, caret: input.selectionStart ?? masked.length })
+        }
+    })
+    input.addEventListener("keydown", (event) => {
+        const fields = Entry.fields(problems[index]!)
+        // Typing the way a fraction is said aloud walks through its boxes: "1 3/4".
+        const advances = (event.key === " " && field === "whole") ||
+            (event.key === "/" && field === "numerator") ||
+            (event.key.toLowerCase() === "r" && field === "quotient")
+        if (advances && part + 1 < fields.length) {
+            event.preventDefault()
+            focusBox(index, part + 1)
+        } else if (event.key === "Enter") {
+            const boxes = allBoxes()
+            const next = boxes[boxes.indexOf(input) + 1]
+            if (next) {
+                next.focus()
+                next.select()
+            } else checkAnswers()
+        } else if (event.key === "Backspace" && input.value === "" && part > 0) {
+            event.preventDefault()
+            focusBox(index, part - 1)
+        }
+    })
+    return input
 }
 
 const comparisonInput = (index: number): HTMLElement =>
     h(
         "span",
         { class: "compare", role: "radiogroup", "aria-label": `Question ${index + 1}: choose a sign` },
-        h("span", { class: "compare-print" }, responses[index]!),
+        h("span", { class: "compare-print" }, responses[index]![0]!),
         (["<", "=", ">"] as const).map((symbol) =>
             h("button", {
                 type: "button",
                 role: "radio",
-                "aria-checked": String(responses[index] === symbol),
+                "aria-checked": String(responses[index]![0] === symbol),
                 "aria-label": symbol === "<" ? "less than" : symbol === ">" ? "greater than" : "equal to",
-                class: responses[index] === symbol ? "selected" : "",
+                class: responses[index]![0] === symbol ? "selected" : "",
                 onclick: () => {
-                    responses[index] = responses[index] === symbol ? "" : symbol
+                    responses[index]![0] = responses[index]![0] === symbol ? "" : symbol
                     checked = false
-                    render({ focus: index })
+                    render({ index })
                 }
             }, symbol)
         )
     )
 
-const textInput = (index: number): HTMLElement =>
-    h("input", {
-        type: "text",
-        class: "answer",
-        value: responses[index]!,
-        placeholder: topicOf().answerHint,
-        "aria-label": `Answer to question ${index + 1}`,
-        autocomplete: "off",
-        autocapitalize: "off",
-        spellcheck: "false",
-        oninput: (event) => setResponse(index, event.target as HTMLInputElement),
-        onkeydown: (event) => {
-            if ((event as KeyboardEvent).key !== "Enter") return
-            const inputs = [...document.querySelectorAll<HTMLInputElement>("input.answer")]
-            const next = inputs[inputs.indexOf(event.target as HTMLInputElement) + 1]
-            if (next) next.focus()
-            else checkAnswers()
-        }
-    })
+/** The answer boxes for one question, laid out like the answer itself. */
+const answerInput = (problem: Problem.Problem, index: number): HTMLElement => {
+    const fields = Entry.fields(problem)
+    const boxOf = (field: Entry.Field) => box(index, fields.indexOf(field), field)
+    if (fields.includes("numerator")) {
+        return h(
+            "span",
+            { class: "mixed entry" },
+            fields.includes("whole") && boxOf("whole"),
+            h("span", { class: "frac" }, boxOf("numerator"), h("span", { class: "frac-bar" }), boxOf("denominator"))
+        )
+    }
+    if (fields.includes("quotient")) {
+        return h("span", { class: "entry" }, boxOf("quotient"), h("span", { class: "op" }, "R"), boxOf("remainder"))
+    }
+    return h("span", { class: "entry" }, boxOf("value"))
+}
 
 const renderQuestion = (problem: Problem.Problem, index: number): HTMLElement => {
     const comparison = problem.answer._tag === "Comparison"
@@ -233,7 +295,7 @@ const renderQuestion = (problem: Problem.Problem, index: number): HTMLElement =>
             { class: "expression" },
             problem.tokens.map((token) => (token._tag === "Blank" ? comparisonInput(index) : renderToken(token))),
             !comparison && h("span", { class: "op" }, "="),
-            !comparison && textInput(index)
+            !comparison && answerInput(problem, index)
         ),
         feedback(index)
     )
@@ -349,22 +411,22 @@ const checkAnswers = (): void => {
 }
 
 const clearAnswers = (): void => {
-    responses = problems.map(() => "")
+    responses = problems.map((problem) => Entry.fields(problem).map(() => ""))
     checked = false
     render()
 }
 
-const render = (options: { focus?: number; caret?: number } = {}): void => {
+const render = (focus?: { index: number; part?: number; caret?: number }): void => {
     document.body.classList.toggle("print-key", printAnswerKey)
     app.replaceChildren(renderControls(), h("div", { class: "pages" }, renderSheet(), renderAnswerKey()))
-    if (options.focus !== undefined) {
-        const question = app.querySelector<HTMLElement>(`.sheet .question[data-index="${options.focus}"]`)
-        const target = question?.querySelector<HTMLElement>("input.answer, .compare button.selected, .compare button")
-        target?.focus()
-        if (target instanceof HTMLInputElement) {
-            const caret = options.caret ?? target.value.length
-            target.setSelectionRange(caret, caret)
-        }
+    if (focus === undefined) return
+    const question = app.querySelector<HTMLElement>(`.sheet .question[data-index="${focus.index}"]`)
+    const target = question?.querySelector<HTMLElement>(
+        focus.part === undefined ? ".compare button.selected, .compare button" : `input.box[data-part="${focus.part}"]`
+    )
+    target?.focus()
+    if (target instanceof HTMLInputElement && focus.caret !== undefined) {
+        target.setSelectionRange(focus.caret, focus.caret)
     }
 }
 

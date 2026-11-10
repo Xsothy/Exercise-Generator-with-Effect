@@ -7,7 +7,6 @@ import * as Rational from "../Rational.js"
 import type { Topic } from "../Topic.js"
 
 const GROUP = "Fractions"
-const HINT = "e.g. 3/4 or 1 3/4"
 
 /** A number as it is printed in the question, together with its exact value. */
 interface Operand {
@@ -82,7 +81,6 @@ export const addition: Topic = {
     id: "fraction-add",
     group: GROUP,
     title: "Adding fractions",
-    answerHint: HINT,
     levels: [
         { description: "Add fractions with the same denominator (e.g., 1/4 + 2/4)", generate: add(sameDenominator) },
         {
@@ -106,7 +104,6 @@ export const subtraction: Topic = {
     id: "fraction-subtract",
     group: GROUP,
     title: "Subtracting fractions",
-    answerHint: HINT,
     levels: [
         {
             description: "Subtract fractions with the same denominator (e.g., 3/4 − 1/4)",
@@ -133,7 +130,6 @@ export const multiplication: Topic = {
     id: "fraction-multiply",
     group: GROUP,
     title: "Multiplying fractions",
-    answerHint: HINT,
     levels: [
         {
             description: "Multiply fractions with small numbers (e.g., 1/4 × 3/5)",
@@ -157,7 +153,6 @@ export const division: Topic = {
     id: "fraction-divide",
     group: GROUP,
     title: "Dividing fractions",
-    answerHint: HINT,
     levels: [
         { description: "Divide fractions with small numbers (e.g., 3/4 ÷ 2/5)", generate: divide(pair(proper(2, 9))) },
         {
@@ -191,7 +186,6 @@ export const simplifying: Topic = {
     id: "fraction-simplify",
     group: GROUP,
     title: "Simplifying fractions",
-    answerHint: "e.g. 2/3",
     levels: [
         {
             description: "Simplify fractions with small numerators and denominators (e.g., 4/6 to 2/3)",
@@ -240,7 +234,6 @@ export const improperToMixed: Topic = {
     id: "fraction-to-mixed",
     group: GROUP,
     title: "Improper fraction → mixed number",
-    answerHint: "e.g. 1 3/4",
     levels: [
         {
             description: "Numerator just a little larger than the denominator (e.g., 7/4 to 1 3/4)",
@@ -280,7 +273,6 @@ export const mixedToImproper: Topic = {
     id: "fraction-to-improper",
     group: GROUP,
     title: "Mixed number → improper fraction",
-    answerHint: "e.g. 7/4",
     levels: [
         {
             description: "Small whole numbers and fraction parts (e.g., 3 1/2 to 7/2)",
@@ -324,7 +316,6 @@ export const comparing: Topic = {
     id: "fraction-compare",
     group: GROUP,
     title: "Comparing fractions",
-    answerHint: "<, = or >",
     levels: [
         {
             description: "Compare fractions with the same denominator (e.g., 3/8 vs 5/8)",

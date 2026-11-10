@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@effect/vitest"
-import { Catalog, Check, Problem, Rational } from "../src/core/index.js"
+import { Catalog, Check, Entry, Problem, Rational } from "../src/core/index.js"
 
 const fraction = (n: number, d: number, form: Problem.FractionForm): Problem.Answer => ({
     _tag: "Fraction",
@@ -130,5 +130,51 @@ describe("Problem", () => {
             "1 5/12"
         ])
         expect(Problem.answerTokens(fraction(6, 3, "mixed")).map(Problem.tokenText)).toEqual(["2"])
+    })
+})
+
+describe("Entry", () => {
+    const first = (topicId: string, level: number) =>
+        Catalog.generateWorksheet({ topicId, level, count: 1, seed: "boxes" })[0]!
+
+    it("chooses boxes that match the shape of the answer", () => {
+        expect(Entry.fields(first("add", 1))).toEqual(["value"])
+        expect(Entry.fields(first("divide", 2))).toEqual(["quotient", "remainder"])
+        expect(Entry.fields(first("fraction-add", 2))).toEqual(["whole", "numerator", "denominator"])
+        expect(Entry.fields(first("fraction-to-mixed", 1))).toEqual(["whole", "numerator", "denominator"])
+        expect(Entry.fields(first("fraction-simplify", 1))).toEqual(["numerator", "denominator"])
+        expect(Entry.fields(first("fraction-to-improper", 1))).toEqual(["numerator", "denominator"])
+        expect(Entry.fields(first("fraction-compare", 1))).toEqual(["sign"])
+    })
+
+    it("only lets valid characters into a box", () => {
+        expect(Entry.mask("numerator", "1a2/ 3")).toBe("123")
+        expect(Entry.mask("value", "1,234.5x.6")).toBe("1,234.56")
+        expect(Entry.mask("value", "-12")).toBe("12")
+    })
+
+    it("joins boxes into an answer", () => {
+        const mixed: ReadonlyArray<Entry.Field> = ["whole", "numerator", "denominator"]
+        expect(Entry.compose(mixed, ["1", "3", "4"])).toBe("1 3/4")
+        expect(Entry.compose(mixed, ["", "3", "4"])).toBe("3/4")
+        expect(Entry.compose(mixed, ["2", "", ""])).toBe("2")
+        expect(Entry.compose(mixed, ["", "", ""])).toBe("")
+        expect(Entry.compose(["quotient", "remainder"], ["5", "4"])).toBe("5 R4")
+        expect(Entry.compose(["quotient", "remainder"], ["5", ""])).toBe("5")
+    })
+
+    it("marks a half-filled fraction as incomplete rather than wrong", () => {
+        const answer = fraction(3, 4, "simplest")
+        const boxes: ReadonlyArray<Entry.Field> = ["whole", "numerator", "denominator"]
+        expect(Check.check(answer, Entry.compose(boxes, ["", "3", ""]))._tag).toBe("Invalid")
+        expect(Check.check(answer, Entry.compose(boxes, ["", "", "4"]))._tag).toBe("Invalid")
+        expect(Check.check(answer, Entry.compose(boxes, ["", "3", "4"]))._tag).toBe("Correct")
+        expect(
+            Check.check(
+                { _tag: "Remainder", quotient: 5, remainder: 4 },
+                Entry.compose(["quotient", "remainder"], ["", "4"])
+            )._tag
+        )
+            .toBe("Invalid")
     })
 })

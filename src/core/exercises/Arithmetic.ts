@@ -28,7 +28,6 @@ export const addition: Topic = {
     id: "add",
     group: GROUP,
     title: "Addition",
-    answerHint: "e.g. 42",
     levels: [
         { description: "Add two 1-digit numbers (e.g., 7 + 8)", generate: additionLevel(digitRanges[0]!) },
         { description: "Add two 2-digit numbers (e.g., 46 + 37)", generate: additionLevel(digitRanges[1]!) },
@@ -59,7 +58,6 @@ export const subtraction: Topic = {
     id: "subtract",
     group: GROUP,
     title: "Subtraction",
-    answerHint: "e.g. 42",
     levels: [
         { description: "Subtract 1-digit numbers (e.g., 9 − 4)", generate: subtractionLevel(digitRanges[0]!) },
         { description: "Subtract 2-digit numbers (e.g., 83 − 47)", generate: subtractionLevel(digitRanges[1]!) },
@@ -90,7 +88,6 @@ export const multiplication: Topic = {
     id: "multiply",
     group: GROUP,
     title: "Multiplication",
-    answerHint: "e.g. 42",
     levels: [
         {
             description: "Multiply a 2-digit number by a 1-digit number (e.g., 34 × 6)",
@@ -131,7 +128,6 @@ export const division: Topic = {
     id: "divide",
     group: GROUP,
     title: "Division",
-    answerHint: "e.g. 5 R4",
     levels: [
         {
             description: "Simple division with no remainders, using small numbers (e.g., 24 ÷ 6 = 4)",

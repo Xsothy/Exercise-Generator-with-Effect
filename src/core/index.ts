@@ -1,5 +1,6 @@
 export * as Catalog from "./Catalog.js"
 export * as Check from "./Check.js"
+export * as Entry from "./Entry.js"
 export * as Generator from "./Generator.js"
 export * as Problem from "./Problem.js"
 export * as Rational from "./Rational.js"

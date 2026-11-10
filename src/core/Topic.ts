@@ -10,7 +10,5 @@ export interface Topic {
     readonly id: string
     readonly group: string
     readonly title: string
-    /** Shows students how an answer should be typed. */
-    readonly answerHint: string
     readonly levels: ReadonlyArray<Level>
 }

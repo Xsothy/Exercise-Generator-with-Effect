@@ -47,7 +47,7 @@ export const parseFraction = (input: string): ParsedFraction | undefined => {
 
 const checkFraction = (expected: Rational.Rational, form: FractionForm, input: string): Verdict => {
     const parsed = parseFraction(input)
-    if (!parsed || parsed.d === 0) return invalid("Type a fraction like 3/4 or a mixed number like 1 3/4")
+    if (!parsed || parsed.d === 0) return invalid("Fill in both the numerator and the denominator")
     const { d, n, whole } = parsed
     const sign = whole !== undefined && whole < 0 ? -1 : 1
     const value = Rational.make((whole ?? 0) * d + sign * n, d)
@@ -65,7 +65,7 @@ const checkFraction = (expected: Rational.Rational, form: FractionForm, input: s
 
 const checkRemainder = (quotient: number, remainder: number, input: string): Verdict => {
     const match = /^(\d+)(?: ?r(?:em(?:ainder)?)? ?(\d+))?$/i.exec(clean(input).replace(/,/g, ""))
-    if (!match) return invalid("Type the quotient and remainder like 5 R4")
+    if (!match) return invalid("Fill in the quotient")
     return Number(match[1]) === quotient && Number(match[2] ?? 0) === remainder ? correct : incorrect
 }
 
@@ -75,7 +75,7 @@ export const check = (answer: Answer, input: string): Verdict => {
     switch (answer._tag) {
         case "Decimal": {
             const value = normalizeDecimal(clean(input))
-            if (value === undefined) return invalid("Type a number like 42 or 4.2")
+            if (value === undefined) return invalid("Enter a number")
             return value === answer.value ? correct : incorrect
         }
         case "Remainder":
