@@ -1,7 +1,7 @@
-export * as Catalog from "./Catalog.js"
-export * as Check from "./Check.js"
-export * as Entry from "./Entry.js"
-export * as Generator from "./Generator.js"
-export * as Problem from "./Problem.js"
-export * as Rational from "./Rational.js"
-export type { Level, Topic } from "./Topic.js"
+export * as Catalog from './catalog'
+export * as Check from './check'
+export * as Entry from './entry'
+export * as Generator from './generator'
+export * as Problem from './problem'
+export * as Rational from './rational'
+export type { Level, Topic } from './topic'

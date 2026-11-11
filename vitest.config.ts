@@ -1,17 +1,14 @@
-import path from "path"
-import { defineConfig } from "vitest/config"
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
-  plugins: [],
   test: {
-    setupFiles: [path.join(__dirname, "setupTests.ts")],
-    include: ["./test/**/*.test.ts"],
-    globals: true
+    include: ['src/**/*.{test,spec}.ts'],
+    environment: 'happy-dom',
+    setupFiles: ['./src/vitest-setup.ts'],
+    server: {
+      deps: {
+        inline: ['foldkit', '@foldkit/ui', '@foldkit/devtools'],
+      },
+    },
   },
-  resolve: {
-    alias: {
-      "@template/basic/test": path.join(__dirname, "test"),
-      "@template/basic": path.join(__dirname, "src")
-    }
-  }
 })

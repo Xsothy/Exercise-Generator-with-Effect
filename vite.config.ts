@@ -1,6 +1,11 @@
-import { defineConfig } from "vite"
+import { defineConfig } from 'vite'
+
+import { foldkit } from '@foldkit/vite-plugin'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-    // Relative asset paths, so the build works from any sub-path (e.g. GitHub Pages).
-    base: "./"
+  plugins: [tailwindcss(), foldkit()],
+  optimizeDeps: {
+    entries: ['src/entry.ts'],
+  },
 })

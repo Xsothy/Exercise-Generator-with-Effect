@@ -1,20 +1,28 @@
-coverage/
-*.tsbuildinfo
+# Dependencies
 node_modules/
-.DS_Store
-tmp/
+
+# Build outputs
 dist/
 build/
-docs/
-dist/*
-build/*
-file/
-scratchpad/*
-!scratchpad/tsconfig.json
-.direnv/
-.idea/
+
+# Environment variables
 .env
+.env.*
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Claude Code worktrees
+.claude/worktrees/
