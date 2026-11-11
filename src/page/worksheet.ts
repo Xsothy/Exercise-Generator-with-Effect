@@ -493,7 +493,7 @@ const answerBoxView = (
         : Option.none(),
     ),
     h.Class(
-      `${field === 'value' ? 'w-32' : 'w-12 sm:w-13'} h-10 rounded-lg border-[1.5px] border-field bg-white text-center font-display text-xl text-ink tabular-nums print:h-8 print:w-10 print:rounded print:border-ink`,
+      `${field === 'value' ? 'w-32' : 'w-12 sm:w-13'} h-10 rounded-lg border-[1.5px] border-field bg-white text-center font-display text-xl text-ink tabular-nums print:h-9 print:rounded-none print:border-0 print:bg-transparent ${field === 'numerator' || field === 'denominator' ? '' : 'print:border-b-[1.5px] print:border-ink'} ${field === 'value' ? 'print:w-36' : 'print:w-14'}`,
     ),
   ])
 
@@ -512,7 +512,7 @@ const signPickerView = (
       h.span(
         [
           h.Class(
-            'hidden size-9 items-center justify-center rounded-full border-[1.5px] border-ink print:inline-flex',
+            'hidden h-9 w-10 items-end justify-center border-b-[1.5px] border-ink print:inline-flex',
           ),
         ],
         [selected],
