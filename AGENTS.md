@@ -15,3 +15,14 @@ subtree_prompted: false
 - A worksheet is fully described by its `WorksheetSpec` (topic, level, count, seed), which lives in the URL. Generation is seeded with `Random.withSeed`, so the same link always gives the same questions. Never generate questions from an unseeded source.
 - Answers are entered in separate boxes (`src/core/entry.ts`), never as free text. A fraction is a numerator box over a denominator box.
 - The site is a client-rendered SPA with path routing, so the host must serve `index.html` for unknown paths.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in this repo's GitHub Issues (`gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
