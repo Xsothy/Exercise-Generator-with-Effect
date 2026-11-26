@@ -39,7 +39,7 @@ export const tokenView = <Message>(
     Blank: () =>
       h.span([
         h.Class(
-          'inline-block size-8 rounded-full border-2 border-accent bg-white',
+          'inline-block size-8 rounded-full border-2 border-accent bg-surface',
         ),
       ]),
     Frac: ({ maybeWhole, n, d }) =>

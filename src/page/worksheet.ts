@@ -448,10 +448,10 @@ const FIELD_LABELS: Readonly<Record<Entry.Field, string>> = {
 }
 
 const SECONDARY_BUTTON =
-  'inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border border-edge bg-white px-4 font-medium text-ink hover:border-accent cursor-pointer'
+  'inline-flex h-11 items-center justify-center gap-2 rounded-[10px] border border-edge bg-surface px-4 font-medium text-ink hover:border-accent cursor-pointer'
 
 const PRIMARY_BUTTON =
-  'inline-flex h-12 items-center justify-center gap-2 rounded-[10px] bg-accent px-5 font-semibold text-white hover:bg-accent-strong cursor-pointer'
+  'inline-flex h-12 items-center justify-center gap-2 rounded-[10px] bg-accent px-5 font-semibold text-on-accent hover:bg-accent-strong cursor-pointer'
 
 const verdictOf = (ready: ReadySheet, question: number): Check.Verdict =>
   pipe(
@@ -493,7 +493,7 @@ const answerBoxView = (
         : Option.none(),
     ),
     h.Class(
-      `${field === 'value' ? 'w-32' : 'w-12 sm:w-13'} h-10 rounded-lg border-[1.5px] border-field bg-white text-center font-display text-xl text-ink tabular-nums print:h-9 print:rounded-none print:border-0 print:bg-transparent ${field === 'numerator' || field === 'denominator' ? '' : 'print:border-b-[1.5px] print:border-ink'} ${field === 'value' ? 'print:w-36' : 'print:w-14'}`,
+      `${field === 'value' ? 'w-32' : 'w-12 sm:w-13'} h-10 rounded-lg border-[1.5px] border-field bg-surface text-center font-display text-xl text-ink tabular-nums print:h-9 print:rounded-none print:border-0 print:bg-transparent ${field === 'numerator' || field === 'denominator' ? '' : 'print:border-b-[1.5px] print:border-ink'} ${field === 'value' ? 'print:w-36' : 'print:w-14'}`,
     ),
   ])
 
@@ -528,7 +528,7 @@ const signPickerView = (
             ),
             h.OnClick(Message.SelectedSign({ question, sign })),
             h.Class(
-              `size-11 rounded-lg border text-xl cursor-pointer print:hidden ${selected === sign ? 'border-accent bg-accent font-semibold text-white' : 'border-edge bg-white text-ink hover:border-accent'}`,
+              `size-11 rounded-lg border text-xl cursor-pointer print:hidden ${selected === sign ? 'border-accent bg-accent font-semibold text-on-accent' : 'border-edge bg-surface text-ink hover:border-accent'}`,
             ),
           ],
           [sign],
@@ -635,10 +635,10 @@ const feedbackView = (
 
 const questionTone = (marking: Marking, verdict: Check.Verdict): string => {
   if (marking === 'Unmarked') {
-    return 'border-line bg-white'
+    return 'border-line bg-surface'
   }
   return Check.Verdict.match<string>(verdict, {
-    Empty: () => 'border-line bg-white',
+    Empty: () => 'border-line bg-surface',
     Correct: () => 'border-good-edge bg-good-soft',
     Almost: () => 'border-warn-edge bg-warn-soft',
     Invalid: () => 'border-bad-edge bg-bad-soft',
@@ -795,7 +795,7 @@ const resultsView = (
       h.div(
         [
           h.Class(
-            'flex flex-col gap-4 rounded-[14px] border border-line bg-white p-5',
+            'flex flex-col gap-4 rounded-[14px] border border-line bg-surface p-5',
           ),
         ],
         [
@@ -843,7 +843,7 @@ const resultsView = (
       h.div(
         [
           h.Class(
-            'flex flex-col gap-3 rounded-[14px] border border-line bg-white p-5',
+            'flex flex-col gap-3 rounded-[14px] border border-line bg-surface p-5',
           ),
         ],
         [
@@ -900,7 +900,7 @@ const levelPickerView = (
               h.AriaCurrent(level === spec.level ? 'true' : 'false'),
               h.AriaLabel(`Level ${level}`),
               h.Class(
-                `flex size-11 items-center justify-center rounded-[10px] border ${level === spec.level ? 'border-accent bg-accent font-semibold text-white' : 'border-edge bg-white font-medium text-ink hover:border-accent'}`,
+                `flex size-11 items-center justify-center rounded-[10px] border ${level === spec.level ? 'border-accent bg-accent font-semibold text-on-accent' : 'border-edge bg-surface font-medium text-ink hover:border-accent'}`,
               ),
             ],
             [`${level}`],
@@ -935,7 +935,7 @@ const countStepperView = (
       h.div(
         [
           h.Class(
-            'flex items-center overflow-hidden rounded-[10px] border border-edge bg-white',
+            'flex items-center overflow-hidden rounded-[10px] border border-edge bg-surface',
           ),
         ],
         [
@@ -1038,7 +1038,7 @@ const headingView = (
       h.div(
         [
           h.Class(
-            'flex flex-wrap items-center gap-x-10 gap-y-4 rounded-[14px] border border-line bg-white px-5 py-4 print:hidden',
+            'flex flex-wrap items-center gap-x-10 gap-y-4 rounded-[14px] border border-line bg-surface px-5 py-4 print:hidden',
           ),
         ],
         [
@@ -1070,7 +1070,7 @@ const answerKeyView = (
     [
       h.AriaLabel('Answer key'),
       h.Class(
-        `${onScreen} ${onPaper} rounded-[14px] border border-line bg-white p-6 print:rounded-none print:border-0 print:p-0`,
+        `${onScreen} ${onPaper} rounded-[14px] border border-line bg-surface p-6 print:rounded-none print:border-0 print:p-0`,
       ),
     ],
     [

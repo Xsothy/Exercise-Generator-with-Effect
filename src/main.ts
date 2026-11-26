@@ -176,7 +176,7 @@ const logoView = (h: HtmlBuilder<Message>): Html =>
         [
           h.AriaHidden(true),
           h.Class(
-            'flex size-8 items-center justify-center rounded-lg bg-accent font-display text-lg font-bold text-white',
+            'flex size-8 items-center justify-center rounded-lg bg-accent font-display text-lg font-bold text-on-accent',
           ),
         ],
         ['÷'],
@@ -212,7 +212,7 @@ const searchView = (searchText: string, h: HtmlBuilder<Message>): Html =>
 
 const headerView = (model: Model, h: HtmlBuilder<Message>): Html =>
   h.header(
-    [h.Class('border-b border-line bg-white print:hidden')],
+    [h.Class('border-b border-line bg-surface print:hidden')],
     [
       h.div(
         [
@@ -254,7 +254,7 @@ const samplePreviewView = (topic: Topic, h: HtmlBuilder<Message>): Html => {
       isSingleValue
         ? h.span([
             h.Class(
-              'inline-block h-8 w-9 rounded-md border-2 border-accent bg-white',
+              'inline-block h-8 w-9 rounded-md border-2 border-accent bg-surface',
             ),
           ])
         : h.empty,
@@ -271,7 +271,7 @@ const topicCardView = (topic: Topic, h: HtmlBuilder<Message>): Html =>
         [
           h.Href(firstLevelUrl(topic)),
           h.Class(
-            'flex flex-1 flex-col overflow-hidden rounded-[14px] border border-line bg-white text-ink hover:border-accent',
+            'flex flex-1 flex-col overflow-hidden rounded-[14px] border border-line bg-surface text-ink hover:border-accent',
           ),
         ],
         [
@@ -369,7 +369,7 @@ const groupFilterView = (
       h.AriaPressed(isSelected ? 'true' : 'false'),
       h.OnClick(Message.SelectedGroup({ maybeGroup })),
       h.Class(
-        `flex min-h-11 items-center justify-between gap-4 rounded-[10px] px-3 text-left cursor-pointer ${isSelected ? 'bg-accent font-semibold text-white' : 'font-medium text-ink hover:bg-white'}`,
+        `flex min-h-11 items-center justify-between gap-4 rounded-[10px] px-3 text-left cursor-pointer ${isSelected ? 'bg-accent font-semibold text-on-accent' : 'font-medium text-ink hover:bg-surface'}`,
       ),
     ],
     [

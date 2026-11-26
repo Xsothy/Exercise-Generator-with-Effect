@@ -10,6 +10,10 @@
   --color-edge: #c3cad8;
   --color-field: #6b7690;
   --color-ground: #f3f5f9;
+  --color-surface: #ffffff;
+  --color-on-accent: #ffffff;
+  --color-paper: #fafbfd;
+  --color-paper-line: #e6eaf2;
 
   --color-accent: #2747c7;
   --color-accent-strong: #1b3396;
@@ -29,6 +33,41 @@
   --color-bad-edge: #e2a19c;
 }
 
+/* Dark mode follows the system setting. Print always stays light. */
+@media screen and (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-ink: #e6eaf2;
+    --color-muted: #a3adc2;
+    --color-line: #2a3346;
+    --color-edge: #3b465e;
+    --color-field: #7e8aa6;
+    --color-ground: #0f1420;
+    --color-surface: #171e2c;
+    --color-on-accent: #0f1420;
+    --color-paper: #141b28;
+    --color-paper-line: #222b3c;
+
+    --color-accent: #8ea2ff;
+    --color-accent-strong: #b4c2ff;
+    --color-accent-soft: #1e2742;
+
+    --color-good: #7ddca0;
+    --color-good-soft: #13291d;
+    --color-good-edge: #2f6b47;
+    --color-good-bar: #3fae6b;
+
+    --color-warn: #f2c260;
+    --color-warn-soft: #2e2410;
+    --color-warn-edge: #b98a1e;
+
+    --color-bad: #ff9f97;
+    --color-bad-soft: #331816;
+    --color-bad-edge: #8c3a33;
+  }
+}
+
 body {
   margin: 0;
   background: var(--color-ground);
@@ -37,10 +76,10 @@ body {
 }
 
 .graph-paper {
-  background-color: #fafbfd;
+  background-color: var(--color-paper);
   background-image:
-    linear-gradient(#e6eaf2 1px, transparent 1px),
-    linear-gradient(90deg, #e6eaf2 1px, transparent 1px);
+    linear-gradient(var(--color-paper-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-paper-line) 1px, transparent 1px);
   background-size: 16px 16px;
 }
 
